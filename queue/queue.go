@@ -49,34 +49,34 @@ func (q *queue) Peek() any {
 }
 
 func (q *queue) Poll() any {
-
-	var returnValue any
 	if q.size == 0 {
 		return nil
 	} else if q.size == 1 {
-		returnValue = q.head.val
-		q = New(q.queueType)
+		val := q.head.val
+		*q = *New(val)
+		return val
 	} else {
-		returnValue = q.head.val
+		val := q.head.val
 		q.head = q.head.next
+		q.size--
+		return val
 	}
-
-	q.size--
-	return returnValue
 }
 
 func (q *queue) Size() int {
 	return q.size
 }
 
-func (q *queue) isEmpty() bool {
+func (q *queue) IsEmpty() bool {
 	return q.size == 0
 }
 
-func (q *queue) Print() {
+func (q *queue) String() string {
 
-	if q.size == 1 {
-		fmt.Println(q.head.val)
+	if q.size == 0 {
+		return ""
+	} else if q.size == 1 {
+		return fmt.Sprint(q.head.val)
 	} else {
 		var stringBuilder strings.Builder
 		head := q.head
@@ -91,7 +91,7 @@ func (q *queue) Print() {
 			head = head.next
 		}
 
-		fmt.Println(stringBuilder.String())
+		return stringBuilder.String()
 	}
 }
 
