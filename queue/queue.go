@@ -2,39 +2,32 @@ package queue
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 )
 
-type node struct {
-	val  any
-	next *node
+type node[T any] struct {
+	val  T
+	next *node[T]
 }
 
-type queue struct {
-	head      *node
-	tail      *node
-	size      int
-	queueType reflect.Type
+type queue[T any] struct {
+	head *node[T]
+	tail *node[T]
+	size int
 }
 
-func New(t any) *queue {
-	return &queue{queueType: reflect.TypeOf(t)}
+func New[T any]() *queue[T] {
+	return &queue[T]{}
 }
 
-func (q *queue) Add(items ...any) error {
+func (q *queue[T]) Add(items ...T) error {
 	for _, item := range items {
-		isValid, err := q.validateType(item)
-		if !isValid {
-			return err
-		}
-
 		if q.head == nil {
-			initialNode := &node{val: item}
+			initialNode := &node[T]{val: item}
 			q.head = initialNode
 			q.tail = initialNode
 		} else {
-			q.tail.next = &node{val: item, next: nil}
+			q.tail.next = &node[T]{val: item, next: nil}
 			q.tail = q.tail.next
 		}
 
@@ -44,35 +37,34 @@ func (q *queue) Add(items ...any) error {
 	return nil
 }
 
-func (q *queue) Peek() any {
-	if q.head != nil {
-		return q.head.val
-	} else {
+func (q *queue[T]) Peek() any {
+	if q.head == nil {
 		return nil
 	}
+
+	return q.head.val
 }
 
-func (q *queue) Poll() any {
-	var val any
+func (q *queue[T]) Poll() any {
 	if q.size == 0 {
-		return val
-	} else {
-		val = q.head.val
-		q.head = q.head.next
+		return nil
 	}
+
+	val := q.head.val
+	q.head = q.head.next
 	q.size--
 	return val
 }
 
-func (q *queue) Size() int {
+func (q *queue[T]) Size() int {
 	return q.size
 }
 
-func (q *queue) IsEmpty() bool {
+func (q *queue[T]) IsEmpty() bool {
 	return q.size == 0
 }
 
-func (q *queue) String() string {
+func (q *queue[T]) String() string {
 	var stringBuilder strings.Builder
 	head := q.head
 
@@ -86,13 +78,4 @@ func (q *queue) String() string {
 	}
 
 	return stringBuilder.String()
-}
-
-func (q *queue) validateType(item any) (bool, error) {
-	t := reflect.TypeOf(item)
-	if t != q.queueType {
-		return false, fmt.Errorf("%s invalid argument for queue of type %s", reflect.TypeOf(item).Name(), q.queueType.Name())
-	}
-
-	return true, nil
 }

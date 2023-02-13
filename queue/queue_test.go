@@ -1,13 +1,12 @@
 package queue
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestQueue_Add(t *testing.T) {
 	t.Run("Add One to Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1)
 		if q.IsEmpty() {
 			t.Error("Failed to add element to queue!")
@@ -15,40 +14,33 @@ func TestQueue_Add(t *testing.T) {
 	})
 
 	t.Run("Add Many to Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		q.Add(1, 2, 3, 4)
 
 		var val any
 		for i := 1; i <= q.size; i++ {
 			val = q.Poll()
-			if val != i {
-				t.Errorf("Failed to add element to queue! Expected %d but got %d", i, val)
+			if val != int64(i) {
+				t.Errorf("Failed to add element to queue! Expected %d of type %T but got %d of type %T", i, i, val, val)
 			}
-		}
-	})
-
-	t.Run("Add Improper Value to Queue", func(t *testing.T) {
-		q := New("Hello!")
-		if q.Add(1) == nil {
-			t.Error("Failed to ensure proper queue type! Added element of type int to queue of type string")
 		}
 	})
 }
 
 func TestQueue_Poll(t *testing.T) {
 	t.Run("Poll from Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1)
 		var val any = q.Poll()
 
-		if val != 1 {
+		if val != int64(1) {
 			t.Errorf("Poll failed! Expected 1 but got %v", val)
 		}
 	})
 
 	t.Run("Poll Head, then Add Elements and Poll Them", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		q.Add(1)
 		q.Poll()
@@ -57,14 +49,14 @@ func TestQueue_Poll(t *testing.T) {
 		var val any
 		for i := 1; i <= q.size; i++ {
 			val = q.Poll()
-			if val != i {
+			if val != int64(i) {
 				t.Errorf("Polling from empty queue resulted in ordering error! Expected %d but got %d\nQueue: %s", i, val, q.String())
 			}
 		}
 	})
 
 	t.Run("Poll from Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		for i := 0; i < 5; i++ {
 			q.Poll()
@@ -74,7 +66,7 @@ func TestQueue_Poll(t *testing.T) {
 		var val any
 		for i := 1; i <= q.size; i++ {
 			val = q.Poll()
-			if val != i {
+			if val != int64(i) {
 				t.Errorf("Polling from empty queue resulted in ordering error! Expected %d but got %d\nQueue: %s", i, val, q.String())
 			}
 		}
@@ -83,7 +75,7 @@ func TestQueue_Poll(t *testing.T) {
 
 func TestQueue_Peek(t *testing.T) {
 	t.Run("Peek on Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		val := q.Peek()
 		if val != nil {
@@ -92,24 +84,23 @@ func TestQueue_Peek(t *testing.T) {
 	})
 
 	t.Run("Peek on Queue with Single Value", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1)
 
 		val := q.Peek()
-		if val != 1 {
+		if val != int64(1) {
 			t.Errorf("Peek on queue resulted in an unexpected value, %v!", val)
 		}
 	})
 
 	t.Run("Peek on Queue with Multiple Values", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
 
 		for i := 1; i <= q.size; i++ {
 			val := q.Peek()
-			if val != i {
-				t.Errorf("Peek on queue resulted in an unexpected value, %v!", val)
-				fmt.Printf("i=%d, peek=%d\n", i, val)
+			if val != int64(i) {
+				t.Errorf("Peek on queue resulted in an unexpected value!\nExpected: %v\nGot: %v", i, val)
 			}
 			q.Poll()
 		}
@@ -119,7 +110,7 @@ func TestQueue_Peek(t *testing.T) {
 
 func TestQueue_Size(t *testing.T) {
 	t.Run("Size on Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		if q.Size() != 0 {
 			t.Errorf("New queue has size of %d instead of 0!", q.Size())
@@ -127,7 +118,7 @@ func TestQueue_Size(t *testing.T) {
 	})
 
 	t.Run("Size on Non-Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		if q.Size() != 10 {
 			t.Errorf("Queue of 10 elements has size of %d!", q.Size())
@@ -135,7 +126,7 @@ func TestQueue_Size(t *testing.T) {
 	})
 
 	t.Run("Size of Queue After Adding and Polling", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		q.Add(1, 2, 3)
 		if q.Size() != 3 {
@@ -161,7 +152,7 @@ func TestQueue_Size(t *testing.T) {
 
 func TestQueue_IsEmpty(t *testing.T) {
 	t.Run("IsEmpty on Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 
 		if !q.IsEmpty() {
 			t.Error("New queue is not empty!")
@@ -169,7 +160,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 	})
 
 	t.Run("IsEmpty on Queue with Single Value", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1)
 
 		if q.IsEmpty() {
@@ -178,7 +169,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 	})
 
 	t.Run("IsEmpty on Non-Empty Queue, then Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1)
 
 		if q.IsEmpty() {
@@ -200,14 +191,14 @@ func TestQueue_IsEmpty(t *testing.T) {
 
 func TestQueue_String(t *testing.T) {
 	t.Run("String on Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		if q.String() != "" {
 			t.Error("Empty queue not returning empty string!")
 		}
 	})
 
 	t.Run("String on Queue with Single Value", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1)
 
 		expectedString := "1"
@@ -219,7 +210,7 @@ func TestQueue_String(t *testing.T) {
 	})
 
 	t.Run("String on Non-Empty Queue", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		expectedString := "1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9"
 		actualString := q.String()
@@ -229,7 +220,7 @@ func TestQueue_String(t *testing.T) {
 	})
 
 	t.Run("String on Non-Empty Queue after Polling", func(t *testing.T) {
-		q := New(1)
+		q := New[int64]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		for i := 0; i < 5; i++ {
 			q.Poll()
