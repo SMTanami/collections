@@ -214,7 +214,7 @@ func TestQueue_String(t *testing.T) {
 		actualString := q.String()
 
 		if actualString != expectedString {
-			t.Errorf("\nReturned: %s\nGot: %s", actualString, expectedString)
+			t.Errorf("\nExpected: %s\nGot: %s", expectedString, actualString)
 		}
 	})
 
@@ -224,7 +224,7 @@ func TestQueue_String(t *testing.T) {
 		expectedString := "1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9"
 		actualString := q.String()
 		if actualString != expectedString {
-			t.Errorf("\nReturned: %s\nGot: %s", actualString, expectedString)
+			t.Errorf("\nExpected: %s\nGot: %s", expectedString, actualString)
 		}
 	})
 
@@ -237,7 +237,7 @@ func TestQueue_String(t *testing.T) {
 		expectedString := "6 -> 7 -> 8 -> 9"
 		actualString := q.String()
 		if actualString != expectedString {
-			t.Errorf("\nReturned: %s\nGot: %s", actualString, expectedString)
+			t.Errorf("\nExpected: %s\nGot: %s", expectedString, actualString)
 		}
 	})
 }
