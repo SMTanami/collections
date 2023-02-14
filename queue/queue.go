@@ -5,22 +5,22 @@ import (
 	"strings"
 )
 
-type node[T any] struct {
+type node[T comparable] struct {
 	val  T
 	next *node[T]
 }
 
-type queue[T any] struct {
+type queue[T comparable] struct {
 	head *node[T]
 	tail *node[T]
 	size int
 }
 
-func New[T any]() *queue[T] {
+func New[T comparable]() *queue[T] {
 	return &queue[T]{}
 }
 
-func (q *queue[T]) Add(items ...T) error {
+func (q *queue[T]) Add(items ...T) {
 	for _, item := range items {
 		if q.head == nil {
 			initialNode := &node[T]{val: item}
@@ -33,16 +33,6 @@ func (q *queue[T]) Add(items ...T) error {
 
 		q.size++
 	}
-
-	return nil
-}
-
-func (q *queue[T]) Peek() any {
-	if q.head == nil {
-		return nil
-	}
-
-	return q.head.val
 }
 
 func (q *queue[T]) Poll() any {
@@ -54,6 +44,31 @@ func (q *queue[T]) Poll() any {
 	q.head = q.head.next
 	q.size--
 	return val
+}
+
+func (q *queue[T]) Peek() any {
+	if q.head == nil {
+		return nil
+	}
+
+	return q.head.val
+}
+
+func (q *queue[T]) Clear() {
+	cleared := New[T]()
+	*q = *cleared
+}
+
+func (q *queue[T]) Contains(item T) bool {
+	head := q.head
+	for head != nil {
+		if head.val == item {
+			return true
+		}
+		head = head.next
+	}
+
+	return false
 }
 
 func (q *queue[T]) Size() int {

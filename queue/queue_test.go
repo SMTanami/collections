@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"math/rand"
 	"testing"
 )
 
@@ -105,6 +106,99 @@ func TestQueue_Peek(t *testing.T) {
 			q.Poll()
 		}
 
+	})
+}
+
+func TestQueue_Contains(t *testing.T) {
+	t.Run("Contains on Empty Queue", func(t *testing.T) {
+		q := New[int64]()
+		val := rand.Int63()
+
+		if q.Contains(val) {
+			t.Errorf("q.Contains(%d) returned true when queue is empty!", val)
+		}
+	})
+
+	t.Run("Contains on Single Element Queue", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1)
+		desiredValue := 1
+
+		if !q.Contains(desiredValue) {
+			t.Errorf("\nq.Contains(%d) returned false for queue: %s", desiredValue, q.String())
+		}
+	})
+
+	t.Run("Contains on Multi-Element Queue", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		desiredValue := 7
+
+		if !q.Contains(desiredValue) {
+			t.Errorf("\nq.Contains(%d) returned false for queue: %s", desiredValue, q.String())
+		}
+	})
+
+	t.Run("Contains on Queue with Poll", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1)
+		desiredValue := 1
+
+		if !q.Contains(desiredValue) {
+			t.Errorf("\nq.Contains(%d) returned false for queue: %s", desiredValue, q.String())
+		}
+
+		q.Poll()
+
+		if q.Contains(desiredValue) {
+			t.Errorf("\nq.Contains(%d) returned true for queue: %s", desiredValue, q.String())
+		}
+	})
+}
+
+func TestQueue_Clear(t *testing.T) {
+	t.Run("Clear Should Return Queue with Size of 0", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7)
+
+		q.Clear()
+
+		if q.Size() != 0 {
+			t.Errorf("Size after clear is %d but expected 0", q.Size())
+		}
+	})
+
+	t.Run("Clear then Poll Shuold Return nil", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7)
+
+		q.Clear()
+
+		if q.Poll() != nil {
+			t.Errorf("Poll after clear returned %d but expected nil", q.Peek())
+		}
+	})
+
+	t.Run("Clear then Peek Should Return nil", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7)
+
+		q.Clear()
+
+		if q.Peek() != nil {
+			t.Errorf("Peek after clear returned %d but expected nil", q.Peek())
+		}
+	})
+
+	t.Run("Clear then IsEmpty Should Return true", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7)
+
+		q.Clear()
+
+		if !q.IsEmpty() {
+			t.Error("IsEmpty after clear returned false but expected true", q.IsEmpty())
+		}
 	})
 }
 
