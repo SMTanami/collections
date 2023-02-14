@@ -5,21 +5,22 @@ import (
 	"strings"
 )
 
-// A node is a container that holds a value as well as a reference to the next node after it. Nodes are used internally by the queue, and is therefore non-exportable.
+// A node is a data object that holds a value and a reference to another node that follows it. Nodes are used
+// internally by the queue, and is therefore non-exportable.
 type node[T comparable] struct {
 	val  T
 	next *node[T]
 }
 
-// A Queue is a data structure that (at least in this instance) maintains data in a FIFO (first-in-first-out) manner.
-// All elements added to this queue are added to the 'tail' of the queue. Any operations used to retrieve data from
-// the queue via Poll() or Peek() returns the 'head' of the queue.
+// A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
+// All elements added to the queue are added to the 'tail' of the queue. Operations used to retrieve data
+// such as Poll() or Peek() return the value stored in the 'head' of the queue.
 //
-// This queue is implemented by using nodes, not slices or arrays. This decision has it's pros and cons. Adding to the
-// queue is always O(1) and the memory used by the queue is always O(n) and no more. Queue's that are implemented via
-// arrays maintain their empty cells of incredible length, which therefore can lead to an array of 10,000 indexes with
-// only a handful of elements. A node based implementation, however, causes slower performance of adding in batches, which
-// may be useful in some cases. Another queue implementation will be added for such benefits.
+// This queue is implemented using nodes, not slices or arrays. This decision has it's pros and cons. Adding to the
+// queue is always O(1) and the memory used by the queue is always O(n). Queue's that are implemented using
+// arrays or slices maintain many empty cells when the head is relocated, allowing an array or slice of 100,000
+// indexes to hold just 1,000 elements. On the other hand, a node based implementation is not as performant when
+// adding many values at once consistently. Another type of queue implementation will be added for that use case.
 type queue[T comparable] struct {
 	head *node[T]
 	tail *node[T]
@@ -31,7 +32,7 @@ func New[T comparable]() *queue[T] {
 	return &queue[T]{}
 }
 
-// Adds one or many elements to the queue.
+// Adds element(s) to the tail-end of the queue.
 func (q *queue[T]) Add(elements ...T) {
 	for _, elem := range elements {
 		if q.head == nil {
@@ -59,7 +60,7 @@ func (q *queue[T]) Poll() any {
 	return val
 }
 
-// Returns the value of the head but does not remove it. If the queue is empty, returns nil.
+// Returns the value of the head of the queue but does not remove it. If the queue is empty, returns nil.
 func (q *queue[T]) Peek() any {
 	if q.IsEmpty() {
 		return nil
@@ -68,7 +69,7 @@ func (q *queue[T]) Peek() any {
 	return q.head.val
 }
 
-// Removes all of the elements from the queue.
+// Removes all elements from the queue.
 func (q *queue[T]) Clear() {
 	cleared := New[T]()
 	*q = *cleared
@@ -87,12 +88,36 @@ func (q *queue[T]) Contains(element T) bool {
 	return false
 }
 
+// Removes the first instance of the given element from the queue.
+func (q *queue[T]) Remove(element T) {
+	sentinel := &node[T]{next: q.head}
+
+	for sentinel.next != nil {
+		if sentinel.next.val == element {
+			sentinel.next = sentinel.next.next
+			return
+		}
+
+		sentinel = sentinel.next
+	}
+}
+
+// Removes all elements that cause the given predicate to output 'true' when used as input.
+func (q *queue[T]) RemoveIf(filter func(queueElement T) bool) {
+	sentinel := &node[T]{next: q.head}
+
+	for sentinel.next != nil {
+		if filter(sentinel.next.val) {
+			
+	}
+}
+
 // Returns the amount of elements contained within the queue.
 func (q *queue[T]) Size() int {
 	return q.size
 }
 
-// Returns true if the queue contains no elements, false otherwise.
+// Returns true if the queue contains no elements, returns false otherwise.
 func (q *queue[T]) IsEmpty() bool {
 	return q.size == 0
 }

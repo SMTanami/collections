@@ -1,6 +1,7 @@
 package queue
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 )
@@ -199,6 +200,34 @@ func TestQueue_Clear(t *testing.T) {
 		if !q.IsEmpty() {
 			t.Error("IsEmpty after clear returned false but expected true", q.IsEmpty())
 		}
+	})
+}
+
+func TestQueue_RemoveIf(t *testing.T) {
+	t.Run("Initial test", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+		q.RemoveIf(func(queueElement int) bool {
+			return queueElement <= 5
+		})
+
+		if q.Size() != 5 {
+			t.Errorf("Expected queue of size %d but was size %d", 5, q.Size())
+		}
+
+		fmt.Println(q.String())
+	})
+}
+
+func TestQueue_Remove(t *testing.T) {
+	t.Run("Initial test", func(t *testing.T) {
+		q := New[int]()
+		q.Add(2, 5, 3, 4, 1, 7)
+
+		q.Remove(3)
+
+		fmt.Println(q.String())
 	})
 }
 
