@@ -95,6 +95,7 @@ func (q *queue[T]) Remove(element T) {
 	for sentinel.next != nil {
 		if sentinel.next.val == element {
 			sentinel.next = sentinel.next.next
+			q.size--
 			return
 		}
 
@@ -104,11 +105,20 @@ func (q *queue[T]) Remove(element T) {
 
 // Removes all elements that cause the given predicate to output 'true' when used as input.
 func (q *queue[T]) RemoveIf(filter func(queueElement T) bool) {
-	sentinel := &node[T]{next: q.head}
+	currNode := q.head
 
-	for sentinel.next != nil {
-		if filter(sentinel.next.val) {
-			
+	for currNode.next != nil {
+		if filter(currNode.next.val) {
+			currNode.next = currNode.next.next
+			q.size--
+		} else {
+			currNode = currNode.next
+		}
+	}
+
+	if filter(q.head.val) {
+		q.head = q.head.next
+		q.size--
 	}
 }
 

@@ -204,19 +204,103 @@ func TestQueue_Clear(t *testing.T) {
 }
 
 func TestQueue_RemoveIf(t *testing.T) {
-	t.Run("Initial test", func(t *testing.T) {
+	t.Run("Queue Size Should Remain The Same When Filter Is Always False", func(t *testing.T) {
 		q := New[int]()
-		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-
-		q.RemoveIf(func(queueElement int) bool {
-			return queueElement <= 5
-		})
-
-		if q.Size() != 5 {
-			t.Errorf("Expected queue of size %d but was size %d", 5, q.Size())
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		expectedSize := 9
+		isGreaterThanTen := func(queueElement int) bool {
+			return queueElement > 10
 		}
 
-		fmt.Println(q.String())
+		q.RemoveIf(isGreaterThanTen)
+
+		if q.Size() != expectedSize {
+			t.Errorf("Queue has incorrect size, expected %d but is %d", expectedSize, q.Size())
+		}
+	})
+
+	t.Run("Queue Size Should Be 0 When Filter Removes All Elements", func(t *testing.T) {
+		q := New[int]()
+		q.Add(2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
+		expectedSize := 0
+
+		isLessThanOneHundred := func(queueElement int) bool {
+			return queueElement < 100
+		}
+
+		q.RemoveIf(isLessThanOneHundred)
+
+		if q.Size() != expectedSize {
+			t.Errorf("Queue has incorrect size, expected %d but is %d", expectedSize, q.Size())
+		}
+	})
+
+	t.Run("Queue Elements Should Not Change When Filter Is Always False", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
+		expectedString := "1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9"
+		isGreaterThanTen := func(queueElement int) bool {
+			return queueElement > 10
+		}
+
+		q.RemoveIf(isGreaterThanTen)
+
+		actualString := q.String()
+		if actualString != expectedString {
+			t.Errorf("Queue has improper string representation!\nExpected: %s\nGot: %s", expectedString, actualString)
+		}
+	})
+
+	t.Run("Queue Should Not Contain Any Elements When Filter Is Always True", func(t *testing.T) {
+		q := New[int]()
+		q.Add(2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
+		expectedString := ""
+
+		isLessThanOneHundred := func(queueElement int) bool {
+			return queueElement < 100
+		}
+
+		q.RemoveIf(isLessThanOneHundred)
+
+		actualString := q.String()
+		if actualString != expectedString {
+			t.Errorf("Queue has improper string representation!\nExpected: %s\nGot: %s", expectedString, actualString)
+		}
+	})
+
+	t.Run("Queue Size Should Decrease Properly", func(t *testing.T) {
+		q := New[int]()
+		q.Add(88, 2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
+		expectedSize := 12
+
+		isGreaterThanTen := func(queueElement int) bool {
+			return queueElement > 10
+		}
+
+		q.RemoveIf(isGreaterThanTen)
+
+		actualSize := q.Size()
+
+		if actualSize != expectedSize {
+			t.Errorf("Queue has incorrect size, expected %d but is %d", expectedSize, actualSize)
+		}
+	})
+
+	t.Run("Queue Nodes Should Be Properly Reorganized After RemoveIf Removes Several Elements", func(t *testing.T) {
+		q := New[int]()
+		q.Add(88, 2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
+		expectedString := "2 -> 7 -> 3 -> 8 -> 1 -> 9 -> 1 -> 3 -> 5 -> 5 -> 5 -> 1"
+
+		isGreaterThanTen := func(queueElement int) bool {
+			return queueElement > 10
+		}
+
+		q.RemoveIf(isGreaterThanTen)
+
+		actualString := q.String()
+		if actualString != expectedString {
+			t.Errorf("Queue has improper string representation!\nExpected: %s\nGot: %s", expectedString, actualString)
+		}
 	})
 }
 
@@ -225,7 +309,7 @@ func TestQueue_Remove(t *testing.T) {
 		q := New[int]()
 		q.Add(2, 5, 3, 4, 1, 7)
 
-		q.Remove(3)
+		q.Remove(5)
 
 		fmt.Println(q.String())
 	})
