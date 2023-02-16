@@ -143,10 +143,10 @@ func (q *queue[T]) String() string {
 	head := q.head
 
 	for head != nil {
-		if head.next == nil {
-			stringBuilder.WriteString(fmt.Sprint(head.val))
-		} else {
+		if head.next != nil {
 			stringBuilder.WriteString(fmt.Sprintf("%v -> ", head.val))
+		} else {
+			stringBuilder.WriteString(fmt.Sprint(head.val))
 		}
 		head = head.next
 	}
