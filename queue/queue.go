@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// A node is a data object that holds a value and a reference to another node that follows it. Nodes are used
+// A node is a data object that holds a value and a reference to a following node. Nodes are used
 // internally by the queue, and is therefore non-exportable.
 type node[T comparable] struct {
 	val  T
@@ -13,14 +13,16 @@ type node[T comparable] struct {
 }
 
 // A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
-// All elements added to the queue are added to the 'tail' of the queue. Operations used to retrieve data
-// such as Poll() or Peek() return the value stored in the 'head' of the queue.
+// All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Poll() and Peek() -
+// return the value stored in the 'head' of the queue.
 //
-// This queue is implemented using nodes, not slices or arrays. This decision has it's pros and cons. Adding to the
+// This queue is implemented using nodes, not slices or arrays; this decision has it's pros and cons. Adding to the
 // queue is always O(1) and the memory used by the queue is always O(n). Queue's that are implemented using
-// arrays or slices maintain many empty cells when the head is relocated, allowing an array or slice of 100,000
-// indexes to hold just 1,000 elements. On the other hand, a node based implementation is not as performant when
-// adding many values at once consistently. Another type of queue implementation will be added for that use case.
+// arrays or slices maintain many empty array cells when the head is relocated and the pointer to the head is referencing the 10,000th index,
+// thus allowing an array or slice of 100,000 indexes to hold just 10,000 elements. On the other hand, a node based implementation
+// is not as performant when adding many values at a single time (batches) consistently.
+//
+// Therefore, another queue implementation will be added to cater to such a use case.
 type queue[T comparable] struct {
 	head *node[T]
 	tail *node[T]
@@ -28,7 +30,7 @@ type queue[T comparable] struct {
 }
 
 // Returns a new instance of a queue of the specified type.
-func New[T comparable]() *queue[T] {
+func Queue[T comparable]() *queue[T] {
 	return &queue[T]{}
 }
 
@@ -71,7 +73,7 @@ func (q *queue[T]) Peek() any {
 
 // Removes all elements from the queue.
 func (q *queue[T]) Clear() {
-	cleared := New[T]()
+	cleared := Queue[T]()
 	*q = *cleared
 }
 
