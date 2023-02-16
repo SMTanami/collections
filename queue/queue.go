@@ -35,13 +35,13 @@ func New[T comparable]() *queue[T] {
 // Adds element(s) to the tail-end of the queue.
 func (q *queue[T]) Add(elements ...T) {
 	for _, elem := range elements {
-		if q.head == nil {
+		if q.head != nil {
+			q.tail.next = &node[T]{val: elem, next: nil}
+			q.tail = q.tail.next
+		} else {
 			initialNode := &node[T]{val: elem}
 			q.head = initialNode
 			q.tail = initialNode
-		} else {
-			q.tail.next = &node[T]{val: elem, next: nil}
-			q.tail = q.tail.next
 		}
 
 		q.size++
@@ -105,8 +105,11 @@ func (q *queue[T]) Remove(element T) {
 
 // Removes all elements that cause the given predicate to output 'true' when used as input.
 func (q *queue[T]) RemoveIf(filter func(queueElement T) bool) {
-	currNode := q.head
+	if q.head == nil {
+		return
+	}
 
+	currNode := q.head
 	for currNode.next != nil {
 		if filter(currNode.next.val) {
 			currNode.next = currNode.next.next
