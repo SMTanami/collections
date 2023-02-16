@@ -5,38 +5,54 @@ import (
 	"strings"
 )
 
-type node[T comparable] struct {
-	val  T
-	next *node[T]
+// A node is a data object that holds a value and a reference to a following node. Nodes are used
+// internally by the queue, and is therefore non-exportable.
+type node[Type comparable] struct {
+	val  Type
+	next *node[Type]
 }
 
-type queue[T comparable] struct {
-	head *node[T]
-	tail *node[T]
+// A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-ouType) manner.
+// All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Poll() and Peek() -
+// return the value stored in the 'head' of the queue.
+//
+// This queue is implemented using nodes, not slices or arrays; this decision has it's pros and cons. Adding to the
+// queue is always O(1) and the memory used by the queue is always O(n). Queue's that are implemented using
+// arrays or slices maintain many empty array cells when the head is relocated and the pointer to the head is referencing the 10,000th index,
+// thus allowing an array or slice of 100,000 indexes to hold just 10,000 elements. On the other hand, a node based implementation
+// is not as performant when adding many values at a single time (batches) consistently.
+//
+// Therefore, another queue implementation will be added to cater to such a use case.
+type queue[Type comparable] struct {
+	head *node[Type]
+	tail *node[Type]
 	size int
 }
 
-func New[T comparable]() *queue[T] {
-	return &queue[T]{}
+// Returns a new instance of a queue of the specified type.
+func Queue[Type comparable]() *queue[Type] {
+	return &queue[Type]{}
 }
 
-func (q *queue[T]) Add(items ...T) {
-	for _, item := range items {
-		if q.head == nil {
-			initialNode := &node[T]{val: item}
+// Adds element(s) to the tail-end of the queue.
+func (q *queue[Type]) Add(elements ...Type) {
+	for _, elem := range elements {
+		if q.head != nil {
+			q.tail.next = &node[Type]{val: elem, next: nil}
+			q.tail = q.tail.next
+		} else {
+			initialNode := &node[Type]{val: elem}
 			q.head = initialNode
 			q.tail = initialNode
-		} else {
-			q.tail.next = &node[T]{val: item, next: nil}
-			q.tail = q.tail.next
 		}
 
 		q.size++
 	}
 }
 
-func (q *queue[T]) Poll() any {
-	if q.size == 0 {
+// Returns the value of the head of the queue and removes it. If the queue is empty, returns nil.
+func (q *queue[Type]) Poll() any {
+	if q.IsEmpty() {
 		return nil
 	}
 
@@ -46,23 +62,26 @@ func (q *queue[T]) Poll() any {
 	return val
 }
 
-func (q *queue[T]) Peek() any {
-	if q.head == nil {
+// Returns the value of the head of the queue but does not remove it. If the queue is empty, returns nil.
+func (q *queue[Type]) Peek() any {
+	if q.IsEmpty() {
 		return nil
 	}
 
 	return q.head.val
 }
 
-func (q *queue[T]) Clear() {
-	cleared := New[T]()
+// Removes all elements from the queue.
+func (q *queue[Type]) Clear() {
+	cleared := Queue[Type]()
 	*q = *cleared
 }
 
-func (q *queue[T]) Contains(item T) bool {
+// Returns true if the queue contains the given element, returns false otherwise.
+func (q *queue[Type]) Contains(element Type) bool {
 	head := q.head
 	for head != nil {
-		if head.val == item {
+		if head.val == element {
 			return true
 		}
 		head = head.next
@@ -71,23 +90,63 @@ func (q *queue[T]) Contains(item T) bool {
 	return false
 }
 
-func (q *queue[T]) Size() int {
+// Removes the first instance of the given element from the queue.
+func (q *queue[Type]) Remove(element Type) {
+	sentinel := &node[Type]{next: q.head}
+
+	for sentinel.next != nil {
+		if sentinel.next.val == element {
+			sentinel.next = sentinel.next.next
+			q.size--
+			return
+		}
+
+		sentinel = sentinel.next
+	}
+}
+
+// Removes all elements that cause the given predicate to output 'true' when used as input.
+func (q *queue[Type]) RemoveIf(filter func(queueElement Type) bool) {
+	if q.head == nil {
+		return
+	}
+
+	currNode := q.head
+	for currNode.next != nil {
+		if filter(currNode.next.val) {
+			currNode.next = currNode.next.next
+			q.size--
+		} else {
+			currNode = currNode.next
+		}
+	}
+
+	if filter(q.head.val) {
+		q.head = q.head.next
+		q.size--
+	}
+}
+
+// Returns the amount of elements contained within the queue.
+func (q *queue[Type]) Size() int {
 	return q.size
 }
 
-func (q *queue[T]) IsEmpty() bool {
+// Returns true if the queue contains no elements, otherwise returns false.
+func (q *queue[Type]) IsEmpty() bool {
 	return q.size == 0
 }
 
-func (q *queue[T]) String() string {
+// Returns a string representation of the queue. The larger the queue, the more expensive the operation.
+func (q *queue[Type]) String() string {
 	var stringBuilder strings.Builder
 	head := q.head
 
 	for head != nil {
-		if head.next == nil {
-			stringBuilder.WriteString(fmt.Sprint(head.val))
-		} else {
+		if head.next != nil {
 			stringBuilder.WriteString(fmt.Sprintf("%v -> ", head.val))
+		} else {
+			stringBuilder.WriteString(fmt.Sprint(head.val))
 		}
 		head = head.next
 	}
