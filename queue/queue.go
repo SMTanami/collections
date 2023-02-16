@@ -132,7 +132,7 @@ func (q *queue[T]) Size() int {
 	return q.size
 }
 
-// Returns true if the queue contains no elements, returns false otherwise.
+// Returns true if the queue contains no elements, otherwise returns false.
 func (q *queue[T]) IsEmpty() bool {
 	return q.size == 0
 }
