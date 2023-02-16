@@ -2,9 +2,78 @@ package queue
 
 import (
 	"fmt"
-	"math/rand"
 	"testing"
 )
+
+func validateQueue[T comparable](expectedOrdering []T, q queue[T]) (bool, string) {
+
+	if len(expectedOrdering) != q.Size() {
+		return false, fmt.Sprintf("Given ordering and queue are not the same size! Ordering length = %d, Queue size = %d\nExpected: %v\nGot: %s", len(expectedOrdering), q.Size(), expectedOrdering, q.String())
+	}
+
+	var queueVal any
+	var expectedVal any
+	head := q.head
+	for i := 0; i < len(expectedOrdering); i++ {
+		expectedVal = expectedOrdering[i]
+		queueVal = head.val
+		if expectedVal != queueVal {
+			return false, fmt.Sprintf("Expected %v but got %v at position %d\nExpected: %v\nGot: %s", expectedVal, queueVal, i, expectedOrdering, q.String())
+		}
+		head = head.next
+	}
+
+	return true, "Valid"
+}
+
+func TestValidateQueue(t *testing.T) {
+	t.Run("Validate Should Return True When Ordering and Queue Match", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		s := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+
+		valid, msg := validateQueue(s, *q)
+
+		if !valid {
+			t.Fatalf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
+		}
+	})
+
+	t.Run("Validate Should Return True When Queue and Ordering Are Empty", func(t *testing.T) {
+		q := New[int]()
+		s := []int{}
+
+		valid, msg := validateQueue(s, *q)
+
+		if !valid {
+			t.Fatalf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
+		}
+	})
+
+	t.Run("Validate Should Return False When Elements Differ", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		s := []int{1, 2, 3, 4, 8, 6, 7, 8, 9, 10}
+
+		valid, msg := validateQueue(s, *q)
+
+		if valid {
+			t.Fatalf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
+		}
+	})
+
+	t.Run("Validate Should Return False When Sizes Differ", func(t *testing.T) {
+		q := New[int]()
+		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+		s := []int{1, 2, 3, 4}
+
+		valid, msg := validateQueue(s, *q)
+
+		if valid {
+			t.Fatalf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
+		}
+	})
+}
 
 func TestQueue_Add(t *testing.T) {
 	t.Run("Add One to Empty Queue", func(t *testing.T) {
@@ -16,68 +85,73 @@ func TestQueue_Add(t *testing.T) {
 	})
 
 	t.Run("Add Many to Empty Queue", func(t *testing.T) {
-		q := New[int64]()
-
+		q := New[int]()
+		expectedOrdering := []int{1, 2, 3, 4}
 		q.Add(1, 2, 3, 4)
 
-		var val any
-		for i := 1; i <= q.size; i++ {
-			val = q.Poll()
-			if val != int64(i) {
-				t.Errorf("Failed to add element to queue! Expected %d of type %T but got %d of type %T", i, i, val, val)
-			}
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("Add Many to Queue with Elements", func(t *testing.T) {
+		q := New[int]()
+		expectedOrdering := []int{14, 62, 33, 1, 23, 27, 52, 6}
+		q.Add(14, 62, 33, 1)
+		q.Add(23, 27, 52, 6)
+
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Error(msg)
 		}
 	})
 }
 
 func TestQueue_Poll(t *testing.T) {
-	t.Run("Poll from Queue", func(t *testing.T) {
-		q := New[int64]()
+	t.Run("Poll Should Return Head of Queue", func(t *testing.T) {
+		q := New[int]()
 		q.Add(1)
 		var val any = q.Poll()
 
-		if val != int64(1) {
-			t.Errorf("Poll failed! Expected 1 but got %v", val)
+		if val != 1 {
+			t.Fatalf("Poll failed! Expected 1 but got %v", val)
 		}
 	})
 
-	t.Run("Poll Head, then Add Elements and Poll Them", func(t *testing.T) {
-		q := New[int64]()
+	t.Run("Poll Should Maintain Order of Queue", func(t *testing.T) {
+		q := New[int]()
+		expectedOrdering := []int{5, 6, 7, 8}
 
 		q.Add(1)
 		q.Poll()
+		q.Add(5, 6, 7, 8)
 
-		q.Add(1, 2, 3, 4)
-		var val any
-		for i := 1; i <= q.size; i++ {
-			val = q.Poll()
-			if val != int64(i) {
-				t.Errorf("Polling from empty queue resulted in ordering error! Expected %d but got %d\nQueue: %s", i, val, q.String())
-			}
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Fatal(msg)
 		}
 	})
 
-	t.Run("Poll from Empty Queue", func(t *testing.T) {
-		q := New[int64]()
+	t.Run("Multiple Polls Should Maintain Order of Queue", func(t *testing.T) {
+		q := New[int]()
+		expectedOrdering := []int{5, 6, 7, 8}
 
 		for i := 0; i < 5; i++ {
 			q.Poll()
 		}
+		q.Add(5, 6, 7, 8)
 
-		q.Add(1, 2, 3, 4)
-		var val any
-		for i := 1; i <= q.size; i++ {
-			val = q.Poll()
-			if val != int64(i) {
-				t.Errorf("Polling from empty queue resulted in ordering error! Expected %d but got %d\nQueue: %s", i, val, q.String())
-			}
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Fatal(msg)
 		}
 	})
 }
 
 func TestQueue_Peek(t *testing.T) {
 	t.Run("Peek on Empty Queue", func(t *testing.T) {
-		q := New[int64]()
+		q := New[int]()
 
 		val := q.Peek()
 		if val != nil {
@@ -86,11 +160,11 @@ func TestQueue_Peek(t *testing.T) {
 	})
 
 	t.Run("Peek on Queue with Single Value", func(t *testing.T) {
-		q := New[int64]()
+		q := New[int]()
 		q.Add(1)
 
 		val := q.Peek()
-		if val != int64(1) {
+		if val != 1 {
 			t.Errorf("Peek on queue resulted in an unexpected value, %v!", val)
 		}
 	})
@@ -106,16 +180,15 @@ func TestQueue_Peek(t *testing.T) {
 			}
 			q.Poll()
 		}
-
 	})
 }
 
 func TestQueue_Contains(t *testing.T) {
 	t.Run("Contains on Empty Queue", func(t *testing.T) {
 		q := New[int64]()
-		val := rand.Int63()
+		val := 7
 
-		if q.Contains(val) {
+		if q.Contains(7) {
 			t.Errorf("q.Contains(%d) returned true when queue is empty!", val)
 		}
 	})
@@ -238,23 +311,23 @@ func TestQueue_RemoveIf(t *testing.T) {
 	t.Run("Queue Elements Should Not Change When Filter Is Always False", func(t *testing.T) {
 		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
-		expectedString := "1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9"
+		expectedOrdering := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 		isGreaterThanTen := func(queueElement int) bool {
 			return queueElement > 10
 		}
 
 		q.RemoveIf(isGreaterThanTen)
 
-		actualString := q.String()
-		if actualString != expectedString {
-			t.Errorf("Queue has improper string representation!\nExpected: %s\nGot: %s", expectedString, actualString)
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Error(msg)
 		}
 	})
 
 	t.Run("Queue Should Not Contain Any Elements When Filter Is Always True", func(t *testing.T) {
 		q := New[int]()
 		q.Add(2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
-		expectedString := ""
+		expectedOrdering := []int{}
 
 		isLessThanOneHundred := func(queueElement int) bool {
 			return queueElement < 100
@@ -262,9 +335,9 @@ func TestQueue_RemoveIf(t *testing.T) {
 
 		q.RemoveIf(isLessThanOneHundred)
 
-		actualString := q.String()
-		if actualString != expectedString {
-			t.Errorf("Queue has improper string representation!\nExpected: %s\nGot: %s", expectedString, actualString)
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Error(msg)
 		}
 	})
 
@@ -289,7 +362,7 @@ func TestQueue_RemoveIf(t *testing.T) {
 	t.Run("Queue Nodes Should Be Properly Reorganized After RemoveIf Removes Several Elements", func(t *testing.T) {
 		q := New[int]()
 		q.Add(88, 2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
-		expectedString := "2 -> 7 -> 3 -> 8 -> 1 -> 9 -> 1 -> 3 -> 5 -> 5 -> 5 -> 1"
+		expectedOrdering := []int{2, 7, 3, 8, 1, 9, 1, 3, 5, 5, 5, 1}
 
 		isGreaterThanTen := func(queueElement int) bool {
 			return queueElement > 10
@@ -297,9 +370,9 @@ func TestQueue_RemoveIf(t *testing.T) {
 
 		q.RemoveIf(isGreaterThanTen)
 
-		actualString := q.String()
-		if actualString != expectedString {
-			t.Errorf("Queue has improper string representation!\nExpected: %s\nGot: %s", expectedString, actualString)
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
+			t.Error(msg)
 		}
 	})
 }
