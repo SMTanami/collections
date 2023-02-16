@@ -7,12 +7,12 @@ import (
 
 // A node is a data object that holds a value and a reference to a following node. Nodes are used
 // internally by the queue, and is therefore non-exportable.
-type node[T comparable] struct {
-	val  T
-	next *node[T]
+type node[Type comparable] struct {
+	val  Type
+	next *node[Type]
 }
 
-// A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
+// A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-ouType) manner.
 // All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Poll() and Peek() -
 // return the value stored in the 'head' of the queue.
 //
@@ -23,25 +23,25 @@ type node[T comparable] struct {
 // is not as performant when adding many values at a single time (batches) consistently.
 //
 // Therefore, another queue implementation will be added to cater to such a use case.
-type queue[T comparable] struct {
-	head *node[T]
-	tail *node[T]
+type queue[Type comparable] struct {
+	head *node[Type]
+	tail *node[Type]
 	size int
 }
 
 // Returns a new instance of a queue of the specified type.
-func Queue[T comparable]() *queue[T] {
-	return &queue[T]{}
+func Queue[Type comparable]() *queue[Type] {
+	return &queue[Type]{}
 }
 
 // Adds element(s) to the tail-end of the queue.
-func (q *queue[T]) Add(elements ...T) {
+func (q *queue[Type]) Add(elements ...Type) {
 	for _, elem := range elements {
 		if q.head != nil {
-			q.tail.next = &node[T]{val: elem, next: nil}
+			q.tail.next = &node[Type]{val: elem, next: nil}
 			q.tail = q.tail.next
 		} else {
-			initialNode := &node[T]{val: elem}
+			initialNode := &node[Type]{val: elem}
 			q.head = initialNode
 			q.tail = initialNode
 		}
@@ -51,7 +51,7 @@ func (q *queue[T]) Add(elements ...T) {
 }
 
 // Returns the value of the head of the queue and removes it. If the queue is empty, returns nil.
-func (q *queue[T]) Poll() any {
+func (q *queue[Type]) Poll() any {
 	if q.IsEmpty() {
 		return nil
 	}
@@ -63,7 +63,7 @@ func (q *queue[T]) Poll() any {
 }
 
 // Returns the value of the head of the queue but does not remove it. If the queue is empty, returns nil.
-func (q *queue[T]) Peek() any {
+func (q *queue[Type]) Peek() any {
 	if q.IsEmpty() {
 		return nil
 	}
@@ -72,13 +72,13 @@ func (q *queue[T]) Peek() any {
 }
 
 // Removes all elements from the queue.
-func (q *queue[T]) Clear() {
-	cleared := Queue[T]()
+func (q *queue[Type]) Clear() {
+	cleared := Queue[Type]()
 	*q = *cleared
 }
 
 // Returns true if the queue contains the given element, returns false otherwise.
-func (q *queue[T]) Contains(element T) bool {
+func (q *queue[Type]) Contains(element Type) bool {
 	head := q.head
 	for head != nil {
 		if head.val == element {
@@ -91,8 +91,8 @@ func (q *queue[T]) Contains(element T) bool {
 }
 
 // Removes the first instance of the given element from the queue.
-func (q *queue[T]) Remove(element T) {
-	sentinel := &node[T]{next: q.head}
+func (q *queue[Type]) Remove(element Type) {
+	sentinel := &node[Type]{next: q.head}
 
 	for sentinel.next != nil {
 		if sentinel.next.val == element {
@@ -106,7 +106,7 @@ func (q *queue[T]) Remove(element T) {
 }
 
 // Removes all elements that cause the given predicate to output 'true' when used as input.
-func (q *queue[T]) RemoveIf(filter func(queueElement T) bool) {
+func (q *queue[Type]) RemoveIf(filter func(queueElement Type) bool) {
 	if q.head == nil {
 		return
 	}
@@ -128,17 +128,17 @@ func (q *queue[T]) RemoveIf(filter func(queueElement T) bool) {
 }
 
 // Returns the amount of elements contained within the queue.
-func (q *queue[T]) Size() int {
+func (q *queue[Type]) Size() int {
 	return q.size
 }
 
 // Returns true if the queue contains no elements, otherwise returns false.
-func (q *queue[T]) IsEmpty() bool {
+func (q *queue[Type]) IsEmpty() bool {
 	return q.size == 0
 }
 
 // Returns a string representation of the queue. The larger the queue, the more expensive the operation.
-func (q *queue[T]) String() string {
+func (q *queue[Type]) String() string {
 	var stringBuilder strings.Builder
 	head := q.head
 
