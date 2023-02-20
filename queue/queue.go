@@ -7,27 +7,26 @@ import (
 
 type Collection[Type comparable] interface {
 	Add(elements ...Type)
-	Remove(element Type)
+	Draw() any
 	Contains(element Type) bool
 	Clear()
 	Size() int
 	IsEmpty() bool
 }
 
-// Filter is the interface that wraps the basic Filter method.
-type Filter[Type comparable] interface {
+// Filter is the interface that wraps the basic Filter and Remove methods.
+type Filterable[Type comparable] interface {
+	Remove(element Type)
 	Filter(filter func(element Type) bool)
 }
 
-// A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-ouType) manner.
-// All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Poll() and Peek() -
-// return the value stored in the 'head' of the queue.
+// A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
+// All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Poll()
+// and Peek() - return the value stored at the 'head' of the queue.
 //
-// This queue is implemented using nodes, not slices or arrays; this decision has it's pros and cons. Adding to the
-// queue is always O(1) and the memory used by the queue is always O(n). Queue's that are implemented using
-// arrays or slices maintain many empty array cells when the head is relocated and the pointer to the head is referencing the 10,000th index,
-// thus allowing an array or slice of 100,000 indexes to hold just 10,000 elements. On the other hand, a node based implementation
-// is not as performant when adding many values at a single time (batches) consistently.
+// This queue is implemented using nodes, not slices or arrays; this decision has it's tradeoffs. A node implementation
+// enables the addition and removal of a node to the queue to be O(1) and the memory used by the queue to be O(n) - always.
+// On the other hand, a node based implementation is not as performant when adding many values (batches) at a single time consistently.
 //
 // Therefore, another queue implementation will be added to cater to such a use case.
 type queue[Type comparable] struct {
@@ -65,8 +64,8 @@ func (q *queue[Type]) Add(elements ...Type) {
 }
 
 // Returns the value of the head of the queue and removes it. If the queue is empty, returns nil.
-func (q *queue[Type]) Poll() any {
-	if q.IsEmpty() {
+func (q *queue[Type]) Draw() any {
+	if q.size == 0 {
 		return nil
 	}
 
@@ -78,7 +77,7 @@ func (q *queue[Type]) Poll() any {
 
 // Returns the value of the head of the queue but does not remove it. If the queue is empty, returns nil.
 func (q *queue[Type]) Peek() any {
-	if q.IsEmpty() {
+	if q.size == 0 {
 		return nil
 	}
 
