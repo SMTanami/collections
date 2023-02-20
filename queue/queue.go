@@ -5,11 +5,18 @@ import (
 	"strings"
 )
 
-// A node is a data object that holds a value and a reference to a following node. Nodes are used
-// internally by the queue, and is therefore non-exportable.
-type node[Type comparable] struct {
-	val  Type
-	next *node[Type]
+type Collection[Type comparable] interface {
+	Add(elements ...Type)
+	Remove(element Type)
+	Contains(element Type) bool
+	Clear()
+	Size() int
+	IsEmpty() bool
+}
+
+// Filter is the interface that wraps the basic Filter method.
+type Filter[Type comparable] interface {
+	Filter(filter func(element Type) bool)
 }
 
 // A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-ouType) manner.
@@ -29,8 +36,15 @@ type queue[Type comparable] struct {
 	size int
 }
 
+// A node is a data object that holds a value and a reference to a following node. Nodes are used
+// internally by the queue, and is therefore non-exportable.
+type node[Type comparable] struct {
+	val  Type
+	next *node[Type]
+}
+
 // Returns a new instance of a queue of the specified type.
-func Queue[Type comparable]() *queue[Type] {
+func New[Type comparable]() *queue[Type] {
 	return &queue[Type]{}
 }
 
@@ -73,7 +87,7 @@ func (q *queue[Type]) Peek() any {
 
 // Removes all elements from the queue.
 func (q *queue[Type]) Clear() {
-	cleared := Queue[Type]()
+	cleared := New[Type]()
 	*q = *cleared
 }
 
@@ -105,8 +119,8 @@ func (q *queue[Type]) Remove(element Type) {
 	}
 }
 
-// Removes all elements that cause the given predicate to output 'true' when used as input.
-func (q *queue[Type]) RemoveIf(filter func(queueElement Type) bool) {
+// Filters all elements from the queue that satisfy the given predicate.
+func (q *queue[Type]) Filter(filter func(queueElement Type) bool) {
 	if q.head == nil {
 		return
 	}
