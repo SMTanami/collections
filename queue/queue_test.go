@@ -28,56 +28,56 @@ func validateQueue[T comparable](expectedOrdering []T, q queue[T]) (bool, string
 
 func TestValidateQueue(t *testing.T) {
 	t.Run("Validate Should Return True When Ordering and Queue Match", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		s := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 		isValid, msg := validateQueue(s, *q)
 
 		if !isValid {
-			t.Fatalf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
+			t.Errorf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
 		}
 	})
 
 	t.Run("Validate Should Return True When Queue and Ordering Are Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		s := []int{}
 
 		isValid, msg := validateQueue(s, *q)
 
 		if !isValid {
-			t.Fatalf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
+			t.Errorf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
 		}
 	})
 
 	t.Run("Validate Should Return False When Elements Differ", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		s := []int{1, 2, 3, 4, 8, 6, 7, 8, 9, 10}
 
 		isValid, msg := validateQueue(s, *q)
 
 		if isValid {
-			t.Fatalf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
+			t.Errorf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
 		}
 	})
 
 	t.Run("Validate Should Return False When Sizes Differ", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		s := []int{1, 2, 3, 4}
 
 		isValid, msg := validateQueue(s, *q)
 
 		if isValid {
-			t.Fatalf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
+			t.Errorf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
 		}
 	})
 }
 
 func TestQueue_Add(t *testing.T) {
 	t.Run("Add Should Add Single Element to Queue When Single Element is Given", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedOrdering := []int{1}
 		q.Add(1)
 
@@ -88,7 +88,7 @@ func TestQueue_Add(t *testing.T) {
 	})
 
 	t.Run("Add Should Add Many Elements to Empty Queue When Given Multiple Values", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedOrdering := []int{1, 2, 3, 4}
 
 		q.Add(1, 2, 3, 4)
@@ -100,7 +100,7 @@ func TestQueue_Add(t *testing.T) {
 	})
 
 	t.Run("Add Should Add Many Elements to Non-Empty Queue When Given Multiple Values", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedOrdering := []int{14, 62, 33, 1, 23, 27, 52, 6}
 		q.Add(14, 62, 33, 1)
 		q.Add(23, 27, 52, 6)
@@ -112,7 +112,7 @@ func TestQueue_Add(t *testing.T) {
 	})
 
 	t.Run("Add Should Properly Adjust Size of Queue When Elements are Added", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(4, 5, 6, 7, 8, 9)
 		expectedSize := 6
 
@@ -125,27 +125,27 @@ func TestQueue_Add(t *testing.T) {
 
 func TestQueue_Poll(t *testing.T) {
 	t.Run("Poll Should Return Nil when Queue is Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 
 		var val any = q.Poll()
 
 		if val != nil {
-			t.Fatalf("Poll failed! Expected 1 but got %v", val)
+			t.Errorf("Poll failed! Expected 1 but got %v", val)
 		}
 	})
 
 	t.Run("Poll Should Return Head of Queue", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1)
 		var val any = q.Poll()
 
 		if val != 1 {
-			t.Fatalf("Poll failed! Expected 1 but got %v", val)
+			t.Errorf("Poll failed! Expected 1 but got %v", val)
 		}
 	})
 
 	t.Run("Poll Should Maintain Order of Queue When Poll is Done on Single Value Queue", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		q.Add(1)
@@ -154,12 +154,12 @@ func TestQueue_Poll(t *testing.T) {
 
 		isValid, msg := validateQueue(expectedOrdering, *q)
 		if !isValid {
-			t.Fatal(msg)
+			t.Error(msg)
 		}
 	})
 
 	t.Run("Poll Should Maintain Order of Queue When Done Multiple Times", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		for i := 0; i < 5; i++ {
@@ -169,12 +169,12 @@ func TestQueue_Poll(t *testing.T) {
 
 		isValid, msg := validateQueue(expectedOrdering, *q)
 		if !isValid {
-			t.Fatal(msg)
+			t.Error(msg)
 		}
 	})
 
 	t.Run("Poll Should Properly Decrease Size of Queue When Done Once", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3)
 
 		q.Poll()
@@ -186,7 +186,7 @@ func TestQueue_Poll(t *testing.T) {
 	})
 
 	t.Run("Poll Should Properly Decrease Size of Queue When Done Multiple Times", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6)
 		expectedSize := 2
 
@@ -203,7 +203,7 @@ func TestQueue_Poll(t *testing.T) {
 
 func TestQueue_Peek(t *testing.T) {
 	t.Run("Peek Should Return Nil When Queue is Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 
 		val := q.Peek()
 		if val != nil {
@@ -212,7 +212,7 @@ func TestQueue_Peek(t *testing.T) {
 	})
 
 	t.Run("Peek Should Return Head When Queue Contains Single Element", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1)
 
 		val := q.Peek()
@@ -222,7 +222,7 @@ func TestQueue_Peek(t *testing.T) {
 	})
 
 	t.Run("Peek Should Return Head When Head of Queue is Changed", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3)
 
 		for i := 1; i <= q.size; i++ {
@@ -237,7 +237,7 @@ func TestQueue_Peek(t *testing.T) {
 
 func TestQueue_Contains(t *testing.T) {
 	t.Run("Contains Should Return False When Queue is Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		val := 7
 
 		if q.Contains(7) {
@@ -246,7 +246,7 @@ func TestQueue_Contains(t *testing.T) {
 	})
 
 	t.Run("Contains Should Return True When Used On Queue With Single Element", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1)
 		desiredValue := 1
 
@@ -256,7 +256,7 @@ func TestQueue_Contains(t *testing.T) {
 	})
 
 	t.Run("Contains Should Return True When Used On Queue With Multiple Elements", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		desiredValue := 7
 
@@ -268,7 +268,7 @@ func TestQueue_Contains(t *testing.T) {
 
 func TestQueue_Clear(t *testing.T) {
 	t.Run("Clear Should Empty the Queue of All Elements", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedOrdering := []int{}
 		q.Add(1, 2, 3, 4, 5, 6, 7)
 
@@ -281,7 +281,7 @@ func TestQueue_Clear(t *testing.T) {
 	})
 
 	t.Run("Clear Should Return Queue with Size of 0", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7)
 
 		q.Clear()
@@ -293,7 +293,7 @@ func TestQueue_Clear(t *testing.T) {
 	})
 }
 
-func TestQueue_RemoveIf(t *testing.T) {
+func TestQueue_Filter(t *testing.T) {
 
 	var isGreaterThanTen func(element int) bool = func(queueElement int) bool {
 		return queueElement > 10
@@ -303,52 +303,52 @@ func TestQueue_RemoveIf(t *testing.T) {
 		return queueElement < 100
 	}
 
-	t.Run("RemoveIf Should Not Crash When Queue is Empty", func(t *testing.T) {
-		q := Queue[int]()
-		q.RemoveIf(isGreaterThanTen)
+	t.Run("Filter Should Not Crash When Queue is Empty", func(t *testing.T) {
+		q := New[int]()
+		q.Filter(isGreaterThanTen)
 	})
 
 	t.Run("Queue Should Leave Queue Unchanegd When Filter Is Always False", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		expectedOrdering := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 
-		q.RemoveIf(isGreaterThanTen)
+		q.Filter(isGreaterThanTen)
 
 		isValid, msg := validateQueue(expectedOrdering, *q)
 		if !isValid {
-			t.Errorf("RemoveIf removed elements from queue when given func is always false! %s", msg)
+			t.Errorf("Filter removed elements from queue when given func is always false! %s", msg)
 		}
 	})
 
 	t.Run("Queue Should Remove All Elements When Filter Is Always True", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
 		expectedOrdering := []int{}
 
-		q.RemoveIf(isLessThanOneHundred)
+		q.Filter(isLessThanOneHundred)
 
 		isValid, msg := validateQueue(expectedOrdering, *q)
 		if !isValid {
-			t.Errorf("RemoveIf did not remove elements from queue when given func is always true! %s", msg)
+			t.Errorf("Filter did not remove elements from queue when given func is always true! %s", msg)
 		}
 	})
 
 	t.Run("RemoevIf Should Reduce the Size of the Queue When it Removes Several Elements", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(88, 2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
 		expectedSize := 12
 
-		q.RemoveIf(isGreaterThanTen)
+		q.Filter(isGreaterThanTen)
 
 		actualSize := q.Size()
 		if actualSize != expectedSize {
-			t.Errorf("RemoveIf failed to properly resize queue, expected %d but is %d", expectedSize, actualSize)
+			t.Errorf("Filter failed to properly resize queue, expected %d but is %d", expectedSize, actualSize)
 		}
 	})
 
-	t.Run("RemoveIf Should Maintain Proper Order of Queue Nodes When Filter is Sometimes True", func(t *testing.T) {
-		q := Queue[int]()
+	t.Run("Filter Should Maintain Proper Order of Queue Nodes When Filter is Sometimes True", func(t *testing.T) {
+		q := New[int]()
 		q.Add(88, 2, 7, 3, 8, 1, 9, 1, 15, 3, 77, 66, 52, 5, 5, 5, 1)
 		expectedOrdering := []int{2, 7, 3, 8, 1, 9, 1, 3, 5, 5, 5, 1}
 
@@ -356,7 +356,7 @@ func TestQueue_RemoveIf(t *testing.T) {
 			return queueElement > 10
 		}
 
-		q.RemoveIf(isGreaterThanTen)
+		q.Filter(isGreaterThanTen)
 
 		isValid, msg := validateQueue(expectedOrdering, *q)
 		if !isValid {
@@ -367,12 +367,12 @@ func TestQueue_RemoveIf(t *testing.T) {
 
 func TestQueue_Remove(t *testing.T) {
 	t.Run("Remove Should Not Crash When Queue ss Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Remove(4)
 	})
 
 	t.Run("Remove Should Leave Queue Unchanged When Queue Does Not Contain Element", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(2, 5, 3, 4, 1, 7)
 		expectedOrdering := []int{2, 5, 3, 4, 1, 7}
 
@@ -385,7 +385,7 @@ func TestQueue_Remove(t *testing.T) {
 	})
 
 	t.Run("Remove Should Remove Element From Queue When Queue Contains Given Element", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(2, 5, 3, 4, 1, 7)
 		expectedOrdering := []int{2, 5, 3, 1, 7}
 
@@ -398,7 +398,7 @@ func TestQueue_Remove(t *testing.T) {
 	})
 
 	t.Run("Remove Should Only Remove First Instance of Given Argument From Queue When Queue Contains Several Instances of Given Element", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(2, 5, 3, 4, 1, 4, 7)
 		expectedOrdering := []int{2, 5, 3, 1, 4, 7}
 
@@ -413,7 +413,7 @@ func TestQueue_Remove(t *testing.T) {
 
 func TestQueue_Size(t *testing.T) {
 	t.Run("Size Should Return 0 When Queueis Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 
 		size := q.Size()
 		if size != 0 {
@@ -422,7 +422,7 @@ func TestQueue_Size(t *testing.T) {
 	})
 
 	t.Run("Size Should Return 10 When Queue Contains 10 Elements", func(t *testing.T) {
-		q := Queue[int64]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 		size := q.Size()
@@ -434,7 +434,7 @@ func TestQueue_Size(t *testing.T) {
 
 func TestQueue_IsEmpty(t *testing.T) {
 	t.Run("IsEmpty Should Return True When Queue is Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 
 		if !q.IsEmpty() {
 			t.Error("New queue is not empty!")
@@ -442,7 +442,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 	})
 
 	t.Run("IsEmpty Should Return False When Queue Contains Elements", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1)
 
 		if q.IsEmpty() {
@@ -451,7 +451,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 	})
 
 	t.Run("IsEmpty Should Return False and then True When Queue is Empty and Then an Element is Added", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 
 		q.Add(1)
 
@@ -475,7 +475,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 
 func TestQueue_String(t *testing.T) {
 	t.Run("String Should Return Empty String When Queue is Empty", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		expectedString := ""
 
 		actualString := q.String()
@@ -485,7 +485,7 @@ func TestQueue_String(t *testing.T) {
 	})
 
 	t.Run("String Return String without Leading Arrow For Last Element", func(t *testing.T) {
-		q := Queue[int]()
+		q := New[int]()
 		q.Add(1)
 
 		expectedString := "1"
@@ -497,7 +497,7 @@ func TestQueue_String(t *testing.T) {
 	})
 
 	t.Run("String Should Return Arrow-Linked String When Queue Contains Multiple Elements", func(t *testing.T) {
-		q := Queue[int64]()
+		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		expectedString := "1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9"
 		actualString := q.String()
