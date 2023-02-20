@@ -7,8 +7,9 @@ import (
 
 func validateQueue[T comparable](expectedOrdering []T, q queue[T]) (bool, string) {
 
-	if len(expectedOrdering) != q.size {
-		return false, fmt.Sprintf("Queue is invalid due to incorrect sizing! Ordering length = %d, Queue size = %d\nExpected: %v\nGot: %s", len(expectedOrdering), q.Size(), expectedOrdering, q.String())
+	qs := q.Size()
+	if len(expectedOrdering) != qs {
+		return false, fmt.Sprintf("Queue is invalid due to incorrect sizing! Ordering length = %d, Queue size = %d\nExpected: %v\nGot: %s", len(expectedOrdering), qs, expectedOrdering, q.String())
 	}
 
 	var queueVal any
@@ -127,7 +128,7 @@ func TestQueue_Poll(t *testing.T) {
 	t.Run("Poll Should Return Nil when Queue is Empty", func(t *testing.T) {
 		q := New[int]()
 
-		var val any = q.Poll()
+		var val any = q.Draw()
 
 		if val != nil {
 			t.Errorf("Poll failed! Expected 1 but got %v", val)
@@ -137,7 +138,7 @@ func TestQueue_Poll(t *testing.T) {
 	t.Run("Poll Should Return Head of Queue", func(t *testing.T) {
 		q := New[int]()
 		q.Add(1)
-		var val any = q.Poll()
+		var val any = q.Draw()
 
 		if val != 1 {
 			t.Errorf("Poll failed! Expected 1 but got %v", val)
@@ -149,7 +150,7 @@ func TestQueue_Poll(t *testing.T) {
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		q.Add(1)
-		q.Poll()
+		q.Draw()
 		q.Add(5, 6, 7, 8)
 
 		isValid, msg := validateQueue(expectedOrdering, *q)
@@ -163,7 +164,7 @@ func TestQueue_Poll(t *testing.T) {
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		for i := 0; i < 5; i++ {
-			q.Poll()
+			q.Draw()
 		}
 		q.Add(5, 6, 7, 8)
 
@@ -177,7 +178,7 @@ func TestQueue_Poll(t *testing.T) {
 		q := New[int]()
 		q.Add(1, 2, 3)
 
-		q.Poll()
+		q.Draw()
 
 		size := q.Size()
 		if size != 2 {
@@ -191,7 +192,7 @@ func TestQueue_Poll(t *testing.T) {
 		expectedSize := 2
 
 		for i := 0; i < 4; i++ {
-			q.Poll()
+			q.Draw()
 		}
 
 		actualSize := q.Size()
@@ -459,7 +460,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 			t.Error("Non-empty queue is returning true for IsEmpty()!")
 		}
 
-		q.Poll()
+		q.Draw()
 
 		if !q.IsEmpty() {
 			t.Error("Empty Queue's IsEmpty() call returning false!")
