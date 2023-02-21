@@ -33,9 +33,9 @@ func TestValidateQueue(t *testing.T) {
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		s := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
-		isValid, msg := validateQueue(s, *q)
+		valid, msg := validateQueue(s, *q)
 
-		if !isValid {
+		if !valid {
 			t.Errorf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
 		}
 	})
@@ -44,9 +44,9 @@ func TestValidateQueue(t *testing.T) {
 		q := New[int]()
 		s := []int{}
 
-		isValid, msg := validateQueue(s, *q)
+		valid, msg := validateQueue(s, *q)
 
-		if !isValid {
+		if !valid {
 			t.Errorf("Expected to validate queue invalidated it instead!\nReturned message: %s", msg)
 		}
 	})
@@ -56,9 +56,9 @@ func TestValidateQueue(t *testing.T) {
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		s := []int{1, 2, 3, 4, 8, 6, 7, 8, 9, 10}
 
-		isValid, msg := validateQueue(s, *q)
+		valid, msg := validateQueue(s, *q)
 
-		if isValid {
+		if valid {
 			t.Errorf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
 		}
 	})
@@ -68,9 +68,9 @@ func TestValidateQueue(t *testing.T) {
 		q.Add(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 		s := []int{1, 2, 3, 4}
 
-		isValid, msg := validateQueue(s, *q)
+		valid, msg := validateQueue(s, *q)
 
-		if isValid {
+		if valid {
 			t.Errorf("Expected method to fail but validated queue instead!\nReturned message: %s", msg)
 		}
 	})
@@ -82,8 +82,8 @@ func TestQueue_Add(t *testing.T) {
 		expectedOrdering := []int{1}
 		q.Add(1)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Add failed to add single element to queue! %s", msg)
 		}
 	})
@@ -94,8 +94,8 @@ func TestQueue_Add(t *testing.T) {
 
 		q.Add(1, 2, 3, 4)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Error(msg)
 		}
 	})
@@ -106,8 +106,8 @@ func TestQueue_Add(t *testing.T) {
 		q.Add(14, 62, 33, 1)
 		q.Add(23, 27, 52, 6)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Error(msg)
 		}
 	})
@@ -124,80 +124,81 @@ func TestQueue_Add(t *testing.T) {
 	})
 }
 
-func TestQueue_Poll(t *testing.T) {
-	t.Run("Poll Should Return Nil when Queue is Empty", func(t *testing.T) {
+func TestQueue_Take(t *testing.T) {
+	t.Run("Take Should Return Nil when Queue is Empty", func(t *testing.T) {
 		q := New[int]()
 
-		var val any = q.Draw()
+		val, drew := q.Take()
 
-		if val != nil {
-			t.Errorf("Poll failed! Expected 1 but got %v", val)
+		if drew != false && val != 0 {
+			t.Errorf("Take failed! Expected 1 but got %v", val)
 		}
 	})
 
-	t.Run("Poll Should Return Head of Queue", func(t *testing.T) {
+	t.Run("Take Should Return Head of Queue", func(t *testing.T) {
 		q := New[int]()
 		q.Add(1)
-		var val any = q.Draw()
 
-		if val != 1 {
-			t.Errorf("Poll failed! Expected 1 but got %v", val)
+		val, drew := q.Take()
+
+		if drew != true || val != 1 {
+			t.Errorf("Take failed! Expected 1 but got %v", val)
 		}
 	})
 
-	t.Run("Poll Should Maintain Order of Queue When Poll is Done on Single Value Queue", func(t *testing.T) {
+	t.Run("Take Should Maintain Order of Queue When Take is Done on Single Value Queue", func(t *testing.T) {
 		q := New[int]()
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		q.Add(1)
-		q.Draw()
+		q.Take()
 		q.Add(5, 6, 7, 8)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Error(msg)
 		}
 	})
 
-	t.Run("Poll Should Maintain Order of Queue When Done Multiple Times", func(t *testing.T) {
+	t.Run("Take Should Maintain Order of Queue When Done Multiple Times", func(t *testing.T) {
 		q := New[int]()
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		for i := 0; i < 5; i++ {
-			q.Draw()
+			q.Take()
 		}
 		q.Add(5, 6, 7, 8)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Error(msg)
 		}
 	})
 
-	t.Run("Poll Should Properly Decrease Size of Queue When Done Once", func(t *testing.T) {
+	t.Run("Take Should Properly Decrease Size of Queue When Done Once", func(t *testing.T) {
 		q := New[int]()
 		q.Add(1, 2, 3)
 
-		q.Draw()
+		q.Take()
 
 		size := q.Size()
 		if size != 2 {
-			t.Errorf("Poll failed to resize queue! Expected %d, got %d", 2, size)
+			t.Errorf("Take failed to resize queue! Expected %d, got %d", 2, size)
 		}
 	})
 
-	t.Run("Poll Should Properly Decrease Size of Queue When Done Multiple Times", func(t *testing.T) {
+	t.Run("Take Should Properly Decrease Size of Queue When Done Multiple Times", func(t *testing.T) {
 		q := New[int]()
 		q.Add(1, 2, 3, 4, 5, 6)
 		expectedSize := 2
 
 		for i := 0; i < 4; i++ {
-			q.Draw()
+			q.Take()
 		}
 
 		actualSize := q.Size()
 		if actualSize != expectedSize {
-			t.Errorf("Poll failed to resize queue! Expected %d, got %d", expectedSize, actualSize)
+			t.Errorf("Take failed to resize queue! Expected %d, got %d", expectedSize, actualSize)
 		}
 	})
 }
@@ -206,8 +207,8 @@ func TestQueue_Peek(t *testing.T) {
 	t.Run("Peek Should Return Nil When Queue is Empty", func(t *testing.T) {
 		q := New[int]()
 
-		val := q.Peek()
-		if val != nil {
+		val, peek := q.Peek()
+		if peek != false && val != 0 {
 			t.Errorf("Peek on empty queue resulted in a non-nil value, %v!", val)
 		}
 	})
@@ -216,8 +217,8 @@ func TestQueue_Peek(t *testing.T) {
 		q := New[int]()
 		q.Add(1)
 
-		val := q.Peek()
-		if val != 1 {
+		val, peek := q.Peek()
+		if peek != true || val != 1 {
 			t.Errorf("Peek on queue resulted in an unexpected value, %v!", val)
 		}
 	})
@@ -227,11 +228,11 @@ func TestQueue_Peek(t *testing.T) {
 		q.Add(1, 2, 3)
 
 		for i := 1; i <= q.size; i++ {
-			val := q.Peek()
-			if val != i {
+			val, peek := q.Peek()
+			if peek != true || val != i {
 				t.Errorf("Peek on queue resulted in an unexpected value!\nExpected: %v\nGot: %v", i, val)
 			}
-			q.head = q.head.next // Change head of the queue without using q.Poll()
+			q.head = q.head.next // Change head of the queue without using q.Take()
 		}
 	})
 }
@@ -275,8 +276,8 @@ func TestQueue_Clear(t *testing.T) {
 
 		q.Clear()
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Clear did not remove all elements from the queue! %s", msg)
 		}
 	})
@@ -316,8 +317,8 @@ func TestQueue_Filter(t *testing.T) {
 
 		q.Filter(isGreaterThanTen)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Filter removed elements from queue when given func is always false! %s", msg)
 		}
 	})
@@ -329,8 +330,8 @@ func TestQueue_Filter(t *testing.T) {
 
 		q.Filter(isLessThanOneHundred)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Filter did not remove elements from queue when given func is always true! %s", msg)
 		}
 	})
@@ -359,8 +360,8 @@ func TestQueue_Filter(t *testing.T) {
 
 		q.Filter(isGreaterThanTen)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Error(msg)
 		}
 	})
@@ -379,8 +380,8 @@ func TestQueue_Remove(t *testing.T) {
 
 		q.Remove(6)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Remove removed an element from the queue when it did not contain the given argument! %s", msg)
 		}
 	})
@@ -392,8 +393,8 @@ func TestQueue_Remove(t *testing.T) {
 
 		q.Remove(4)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Remove removed an element from the queue when it did not contain the given argument! %s", msg)
 		}
 	})
@@ -405,8 +406,8 @@ func TestQueue_Remove(t *testing.T) {
 
 		q.Remove(4)
 
-		isValid, msg := validateQueue(expectedOrdering, *q)
-		if !isValid {
+		valid, msg := validateQueue(expectedOrdering, *q)
+		if !valid {
 			t.Errorf("Remove removed an element from the queue when it did not contain the given argument! %s", msg)
 		}
 	})
@@ -460,7 +461,7 @@ func TestQueue_IsEmpty(t *testing.T) {
 			t.Error("Non-empty queue is returning true for IsEmpty()!")
 		}
 
-		q.Draw()
+		q.Take()
 
 		if !q.IsEmpty() {
 			t.Error("Empty Queue's IsEmpty() call returning false!")
@@ -506,4 +507,10 @@ func TestQueue_String(t *testing.T) {
 			t.Errorf("\nExpected: %s\nGot: %s", expectedString, actualString)
 		}
 	})
+}
+
+func TestQueueType(t *testing.T) {
+	var c Collection[int]
+	c = New[int]()
+	fmt.Println(c)
 }

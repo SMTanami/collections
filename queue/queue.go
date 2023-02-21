@@ -5,23 +5,23 @@ import (
 	"strings"
 )
 
-type Collection[Type comparable] interface {
-	Add(elements ...Type)
-	Draw() any
-	Contains(element Type) bool
+type Collection[T comparable] interface {
+	Add(vals ...T)
+	Take() (T, bool)
+	Contains(val T) bool
 	Clear()
 	Size() int
 	IsEmpty() bool
 }
 
 // Filter is the interface that wraps the basic Filter and Remove methods.
-type Filterable[Type comparable] interface {
-	Remove(element Type)
-	Filter(filter func(element Type) bool)
+type Filterable[T comparable] interface {
+	Remove(e T)
+	Filter(filter func(e T) bool)
 }
 
 // A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
-// All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Poll()
+// All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Take()
 // and Peek() - return the value stored at the 'head' of the queue.
 //
 // This queue is implemented using nodes, not slices or arrays; this decision has it's tradeoffs. A node implementation
@@ -29,32 +29,32 @@ type Filterable[Type comparable] interface {
 // On the other hand, a node based implementation is not as performant when adding many values (batches) at a single time consistently.
 //
 // Therefore, another queue implementation will be added to cater to such a use case.
-type queue[Type comparable] struct {
-	head *node[Type]
-	tail *node[Type]
+type queue[T comparable] struct {
+	head *node[T]
+	tail *node[T]
 	size int
 }
 
 // A node is a data object that holds a value and a reference to a following node. Nodes are used
 // internally by the queue, and is therefore non-exportable.
-type node[Type comparable] struct {
-	val  Type
-	next *node[Type]
+type node[T comparable] struct {
+	val  T
+	next *node[T]
 }
 
 // Returns a new instance of a queue of the specified type.
-func New[Type comparable]() *queue[Type] {
-	return &queue[Type]{}
+func New[T comparable]() *queue[T] {
+	return &queue[T]{}
 }
 
 // Adds element(s) to the tail-end of the queue.
-func (q *queue[Type]) Add(elements ...Type) {
-	for _, elem := range elements {
+func (q *queue[T]) Add(vals ...T) {
+	for _, elem := range vals {
 		if q.head != nil {
-			q.tail.next = &node[Type]{val: elem, next: nil}
+			q.tail.next = &node[T]{val: elem, next: nil}
 			q.tail = q.tail.next
 		} else {
-			initialNode := &node[Type]{val: elem}
+			initialNode := &node[T]{val: elem}
 			q.head = initialNode
 			q.tail = initialNode
 		}
@@ -64,34 +64,36 @@ func (q *queue[Type]) Add(elements ...Type) {
 }
 
 // Returns the value of the head of the queue and removes it. If the queue is empty, returns nil.
-func (q *queue[Type]) Draw() any {
+func (q *queue[T]) Take() (T, bool) {
 	if q.size == 0 {
-		return nil
+		var zero T
+		return zero, false
 	}
 
 	val := q.head.val
 	q.head = q.head.next
 	q.size--
-	return val
+	return val, true
 }
 
 // Returns the value of the head of the queue but does not remove it. If the queue is empty, returns nil.
-func (q *queue[Type]) Peek() any {
+func (q *queue[T]) Peek() (T, bool) {
 	if q.size == 0 {
-		return nil
+		var zero T
+		return zero, false
 	}
 
-	return q.head.val
+	return q.head.val, true
 }
 
 // Removes all elements from the queue.
-func (q *queue[Type]) Clear() {
-	cleared := New[Type]()
+func (q *queue[T]) Clear() {
+	cleared := New[T]()
 	*q = *cleared
 }
 
 // Returns true if the queue contains the given element, returns false otherwise.
-func (q *queue[Type]) Contains(element Type) bool {
+func (q *queue[T]) Contains(element T) bool {
 	head := q.head
 	for head != nil {
 		if head.val == element {
@@ -104,8 +106,8 @@ func (q *queue[Type]) Contains(element Type) bool {
 }
 
 // Removes the first instance of the given element from the queue.
-func (q *queue[Type]) Remove(element Type) {
-	sentinel := &node[Type]{next: q.head}
+func (q *queue[T]) Remove(element T) {
+	sentinel := &node[T]{next: q.head}
 
 	for sentinel.next != nil {
 		if sentinel.next.val == element {
@@ -119,7 +121,7 @@ func (q *queue[Type]) Remove(element Type) {
 }
 
 // Filters all elements from the queue that satisfy the given predicate.
-func (q *queue[Type]) Filter(filter func(queueElement Type) bool) {
+func (q *queue[T]) Filter(filter func(queueElement T) bool) {
 	if q.head == nil {
 		return
 	}
@@ -141,17 +143,17 @@ func (q *queue[Type]) Filter(filter func(queueElement Type) bool) {
 }
 
 // Returns the amount of elements contained within the queue.
-func (q *queue[Type]) Size() int {
+func (q *queue[T]) Size() int {
 	return q.size
 }
 
 // Returns true if the queue contains no elements, otherwise returns false.
-func (q *queue[Type]) IsEmpty() bool {
+func (q *queue[T]) IsEmpty() bool {
 	return q.size == 0
 }
 
 // Returns a string representation of the queue. The larger the queue, the more expensive the operation.
-func (q *queue[Type]) String() string {
+func (q *queue[T]) String() string {
 	var stringBuilder strings.Builder
 	head := q.head
 
