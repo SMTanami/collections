@@ -16,8 +16,8 @@ type Collection[T comparable] interface {
 
 // Filter is the interface that wraps the basic Filter and Remove methods.
 type Filterable[T comparable] interface {
-	Remove(e T)
-	Filter(filter func(e T) bool)
+	Remove(val T)
+	Filter(filter func(val T) bool)
 }
 
 // A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
@@ -27,8 +27,6 @@ type Filterable[T comparable] interface {
 // This queue is implemented using nodes, not slices or arrays; this decision has it's tradeoffs. A node implementation
 // enables the addition and removal of a node to the queue to be O(1) and the memory used by the queue to be O(n) - always.
 // On the other hand, a node based implementation is not as performant when adding many values (batches) at a single time consistently.
-//
-// Therefore, another queue implementation will be added to cater to such a use case.
 type queue[T comparable] struct {
 	head *node[T]
 	tail *node[T]
@@ -106,11 +104,11 @@ func (q *queue[T]) Contains(element T) bool {
 }
 
 // Removes the first instance of the given element from the queue.
-func (q *queue[T]) Remove(element T) {
+func (q *queue[T]) Remove(val T) {
 	sentinel := &node[T]{next: q.head}
 
 	for sentinel.next != nil {
-		if sentinel.next.val == element {
+		if sentinel.next.val == val {
 			sentinel.next = sentinel.next.next
 			q.size--
 			return
@@ -121,7 +119,7 @@ func (q *queue[T]) Remove(element T) {
 }
 
 // Filters all elements from the queue that satisfy the given predicate.
-func (q *queue[T]) Filter(filter func(queueElement T) bool) {
+func (q *queue[T]) Filter(filter func(val T) bool) {
 	if q.head == nil {
 		return
 	}
