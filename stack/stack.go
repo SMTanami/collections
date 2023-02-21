@@ -32,10 +32,13 @@ func New[T comparable]() *stack[T] {
 	return &stack[T]{}
 }
 
+// Adds element(s) to the top of the stack.
 func (st *stack[T]) Add(elements ...T) {
 	st.pile = append(st.pile, elements...)
 }
 
+// Removes the value at the top of the stack and returns it along with a bool value of true if the stack
+// is not empty, otherwise, it will return the zero value of the stack's type and a bool value of false.
 func (st *stack[T]) Draw() (T, bool) {
 	if len(st.pile) == 0 {
 		var zero T
@@ -47,10 +50,12 @@ func (st *stack[T]) Draw() (T, bool) {
 	return top, true
 }
 
+// Removes all elements from the stack.
 func (st *stack[T]) Clear() {
 	st.pile = make([]T, 0, 0)
 }
 
+// Returns true if the stack contains the given element, returns false otherwise.
 func (st *stack[T]) Contains(element T) bool {
 	for _, v := range st.pile {
 		if v == element {
@@ -61,6 +66,7 @@ func (st *stack[T]) Contains(element T) bool {
 	return false
 }
 
+// Removes the first instance of the given element from the top of the stack.
 func (st *stack[T]) Remove(v T) {
 	if len(st.pile) > 0 {
 		for i := len(st.pile) - 1; i >= 0; i-- {
@@ -72,6 +78,7 @@ func (st *stack[T]) Remove(v T) {
 	}
 }
 
+// Filters all elements from the stack that satisfy the given predicate.
 func (st *stack[T]) Filter(filter func(v T) bool) {
 	for i := len(st.pile) - 1; i >= 0; i-- {
 		if filter(st.pile[i]) {
@@ -80,10 +87,12 @@ func (st *stack[T]) Filter(filter func(v T) bool) {
 	}
 }
 
+// Returns the amount of elements contained within the stack.
 func (st *stack[T]) Size() int {
 	return len(st.pile)
 }
 
+// Returns true if the stack contains no elements, otherwise returns false.
 func (st *stack[T]) IsEmpty() bool {
 	if len(st.pile) == 0 {
 		return true
@@ -92,6 +101,7 @@ func (st *stack[T]) IsEmpty() bool {
 	return false
 }
 
+// Returns a string representation of the stack.
 func (st *stack[T]) String() string {
 	return fmt.Sprint(st.pile)
 }
