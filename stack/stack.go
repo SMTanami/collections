@@ -5,9 +5,9 @@ import (
 )
 
 type Collection[T comparable] interface {
-	Add(elements ...T)
-	Draw() (T, bool)
-	Contains(element T) bool
+	Add(vals ...T)
+	Take() (T, bool)
+	Contains(val T) bool
 	Clear()
 	Size() int
 	IsEmpty() bool
@@ -15,7 +15,7 @@ type Collection[T comparable] interface {
 
 // Filter is the interface that wraps the basic Filter and Remove methods.
 type Filterable[T comparable] interface {
-	Remove(v T)
+	Remove(val T)
 	Filter(filter func(v T) bool)
 }
 
@@ -33,13 +33,13 @@ func New[T comparable]() *stack[T] {
 }
 
 // Adds element(s) to the top of the stack.
-func (st *stack[T]) Add(elements ...T) {
-	st.pile = append(st.pile, elements...)
+func (st *stack[T]) Add(vals ...T) {
+	st.pile = append(st.pile, vals...)
 }
 
 // Removes the value at the top of the stack and returns it along with a bool value of true if the stack
 // is not empty, otherwise, it will return the zero value of the stack's type and a bool value of false.
-func (st *stack[T]) Draw() (T, bool) {
+func (st *stack[T]) Take() (T, bool) {
 	if len(st.pile) == 0 {
 		var zero T
 		return zero, false
@@ -56,9 +56,9 @@ func (st *stack[T]) Clear() {
 }
 
 // Returns true if the stack contains the given element, returns false otherwise.
-func (st *stack[T]) Contains(element T) bool {
+func (st *stack[T]) Contains(val T) bool {
 	for _, v := range st.pile {
-		if v == element {
+		if v == val {
 			return true
 		}
 	}
@@ -67,10 +67,10 @@ func (st *stack[T]) Contains(element T) bool {
 }
 
 // Removes the first instance of the given element from the top of the stack.
-func (st *stack[T]) Remove(v T) {
+func (st *stack[T]) Remove(val T) {
 	if len(st.pile) > 0 {
 		for i := len(st.pile) - 1; i >= 0; i-- {
-			if st.pile[i] == v {
+			if st.pile[i] == val {
 				st.pile = append(st.pile[:i], st.pile[i+1:]...)
 				return
 			}
@@ -79,7 +79,7 @@ func (st *stack[T]) Remove(v T) {
 }
 
 // Filters all elements from the stack that satisfy the given predicate.
-func (st *stack[T]) Filter(filter func(v T) bool) {
+func (st *stack[T]) Filter(filter func(val T) bool) {
 	for i := len(st.pile) - 1; i >= 0; i-- {
 		if filter(st.pile[i]) {
 			st.pile = append(st.pile[:i], st.pile[i+1:]...)

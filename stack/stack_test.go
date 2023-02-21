@@ -120,36 +120,36 @@ func TestStack_Add(t *testing.T) {
 	})
 }
 
-func TestStack_Draw(t *testing.T) {
-	t.Run("Draw Should Return Nil when Stack is Empty", func(t *testing.T) {
+func TestStack_Take(t *testing.T) {
+	t.Run("Take Should Return Nil when Stack is Empty", func(t *testing.T) {
 		st := New[int]()
 
-		val, pop := st.Draw()
+		val, pop := st.Take()
 
 		if pop != false {
-			t.Errorf("Draw failed! Expected 1 but got %v", val)
+			t.Errorf("Take failed! Expected 1 but got %v", val)
 		}
 	})
 
-	t.Run("Draw Should Return Top of Stack When Stack Contains One Element", func(t *testing.T) {
+	t.Run("Take Should Return Top of Stack When Stack Contains One Element", func(t *testing.T) {
 		st := New[int]()
 		st.Add(1)
 
-		val, pop := st.Draw()
+		val, pop := st.Take()
 
 		if pop == false || val != 1 {
-			t.Errorf("Draw failed! Expected 1 but got %v", val)
+			t.Errorf("Take failed! Expected 1 but got %v", val)
 		}
 	})
 
-	t.Run("Draw Should Return Top of Stack When Stack Contains Multiple Elements", func(t *testing.T) {
+	t.Run("Take Should Return Top of Stack When Stack Contains Multiple Elements", func(t *testing.T) {
 		st := New[int]()
 		st.Add(1, 2, 3, 4, 5, 6, 7)
 		exp := []int{7, 6, 5, 4, 3, 2, 1}
 
 		act := make([]int, 0, 0)
 		for i := 0; i < st.Size(); i++ {
-			val, pop := st.Draw()
+			val, pop := st.Take()
 			if pop != true {
 				t.Errorf("Got zero value when drawing from top of stack! Expected %d, got %v", exp[i], val)
 			}
@@ -163,13 +163,13 @@ func TestStack_Draw(t *testing.T) {
 		}
 	})
 
-	t.Run("Draw Should Not Fail When Done Multiple Times ON Empty Stack", func(t *testing.T) {
+	t.Run("Take Should Not Fail When Done Multiple Times ON Empty Stack", func(t *testing.T) {
 		st := New[int]()
 		expectedOrdering := []int{5, 6, 7, 8}
 
 		st.Add(1)
 		for i := 0; i < 5; i++ {
-			st.Draw()
+			st.Take()
 		}
 		st.Add(5, 6, 7, 8)
 
@@ -179,31 +179,31 @@ func TestStack_Draw(t *testing.T) {
 		}
 	})
 
-	t.Run("Draw Should Properly Decrease Size of Stack When Done Once", func(t *testing.T) {
+	t.Run("Take Should Properly Decrease Size of Stack When Done Once", func(t *testing.T) {
 		st := New[int]()
 		st.Add(1, 2, 3)
 		exp := 2
 
-		st.Draw()
+		st.Take()
 
 		size := st.Size()
 		if size != exp {
-			t.Errorf("Draw failed to resize Stack! Expected %d, got %d", exp, size)
+			t.Errorf("Take failed to resize Stack! Expected %d, got %d", exp, size)
 		}
 	})
 
-	t.Run("Draw Should Properly Decrease Size of Stack When Done Multiple Times", func(t *testing.T) {
+	t.Run("Take Should Properly Decrease Size of Stack When Done Multiple Times", func(t *testing.T) {
 		st := New[int]()
 		st.Add(1, 2, 3, 4, 5, 6)
 		exp := 2
 
 		for i := 0; i < 4; i++ {
-			st.Draw()
+			st.Take()
 		}
 
 		act := st.Size()
 		if act != exp {
-			t.Errorf("Draw failed to resize Stack! Expected %d, got %d", exp, act)
+			t.Errorf("Take failed to resize Stack! Expected %d, got %d", exp, act)
 		}
 	})
 }
@@ -432,7 +432,7 @@ func TestStack_IsEmpty(t *testing.T) {
 			t.Error("Non-empty Stack is returning true for IsEmpty()!")
 		}
 
-		st.Draw()
+		st.Take()
 
 		if !st.IsEmpty() {
 			t.Error("Empty Stack's IsEmpty() call returning false!")
@@ -478,4 +478,10 @@ func TestStack_String(t *testing.T) {
 			t.Errorf("\nExpected: %s\nGot: %s", expectedString, actualString)
 		}
 	})
+}
+
+func TestStackType(t *testing.T) {
+	var c Collection[int]
+	c = New[int]()
+	fmt.Println(c)
 }
