@@ -1,24 +1,9 @@
-package queue
+package cln
 
 import (
 	"fmt"
 	"strings"
 )
-
-type Collection[T comparable] interface {
-	Add(vals ...T)
-	Take() (T, bool)
-	Contains(val T) bool
-	Clear()
-	Size() int
-	IsEmpty() bool
-}
-
-// Filter is the interface that wraps the basic Filter and Remove methods.
-type Filterable[T comparable] interface {
-	Remove(val T)
-	Filter(filter func(val T) bool)
-}
 
 // A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
 // All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Take()
@@ -41,7 +26,7 @@ type node[T comparable] struct {
 }
 
 // Returns a new instance of a queue of the specified type.
-func New[T comparable]() *queue[T] {
+func NewQueue[T comparable]() *queue[T] {
 	return &queue[T]{}
 }
 
@@ -86,7 +71,7 @@ func (q *queue[T]) Peek() (T, bool) {
 
 // Removes all elements from the queue.
 func (q *queue[T]) Clear() {
-	cleared := New[T]()
+	cleared := NewQueue[T]()
 	*q = *cleared
 }
 
@@ -165,4 +150,18 @@ func (q *queue[T]) String() string {
 	}
 
 	return stringBuilder.String()
+}
+
+// Returns a chan of the same type of the collection
+func (q *queue[T]) Iter() chan T {
+	c := make(chan T)
+	go func() {
+		head := q.head
+		for head != nil {
+			c <- head.val
+			head = head.next
+		}
+		close(c)
+	}()
+	return c
 }
