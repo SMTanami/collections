@@ -1,24 +1,9 @@
-package queue
+package cols
 
 import (
 	"fmt"
 	"strings"
 )
-
-type Collection[T comparable] interface {
-	Add(vals ...T)
-	Take() (T, bool)
-	Contains(val T) bool
-	Clear()
-	Size() int
-	IsEmpty() bool
-}
-
-// Filter is the interface that wraps the basic Filter and Remove methods.
-type Filterable[T comparable] interface {
-	Remove(val T)
-	Filter(filter func(val T) bool)
-}
 
 // A Queue is a data structure that (in this implementation) maintains data in a FIFO (first-in-first-out) manner.
 // All elements added to the queue are added to the 'tail' end of the queue. Operations used to retrieve data - Take()
@@ -27,7 +12,7 @@ type Filterable[T comparable] interface {
 // This queue is implemented using nodes, not slices or arrays; this decision has it's tradeoffs. A node implementation
 // enables the addition and removal of a node to the queue to be O(1) and the memory used by the queue to be O(n) - always.
 // On the other hand, a node based implementation is not as performant when adding many values (batches) at a single time consistently.
-type queue[T comparable] struct {
+type Queue[T comparable] struct {
 	head *node[T]
 	tail *node[T]
 	size int
@@ -41,12 +26,12 @@ type node[T comparable] struct {
 }
 
 // Returns a new instance of a queue of the specified type.
-func New[T comparable]() *queue[T] {
-	return &queue[T]{}
+func NewQueue[T comparable]() *Queue[T] {
+	return &Queue[T]{}
 }
 
 // Adds element(s) to the tail-end of the queue.
-func (q *queue[T]) Add(vals ...T) {
+func (q *Queue[T]) Add(vals ...T) {
 	for _, elem := range vals {
 		if q.head != nil {
 			q.tail.next = &node[T]{val: elem, next: nil}
@@ -62,7 +47,7 @@ func (q *queue[T]) Add(vals ...T) {
 }
 
 // Returns the value of the head of the queue and removes it. If the queue is empty, returns nil.
-func (q *queue[T]) Take() (T, bool) {
+func (q *Queue[T]) Take() (T, bool) {
 	if q.size == 0 {
 		var zero T
 		return zero, false
@@ -75,7 +60,7 @@ func (q *queue[T]) Take() (T, bool) {
 }
 
 // Returns the value of the head of the queue but does not remove it. If the queue is empty, returns nil.
-func (q *queue[T]) Peek() (T, bool) {
+func (q *Queue[T]) Peek() (T, bool) {
 	if q.size == 0 {
 		var zero T
 		return zero, false
@@ -85,13 +70,13 @@ func (q *queue[T]) Peek() (T, bool) {
 }
 
 // Removes all elements from the queue.
-func (q *queue[T]) Clear() {
-	cleared := New[T]()
+func (q *Queue[T]) Clear() {
+	cleared := NewQueue[T]()
 	*q = *cleared
 }
 
 // Returns true if the queue contains the given element, returns false otherwise.
-func (q *queue[T]) Contains(element T) bool {
+func (q *Queue[T]) Contains(element T) bool {
 	head := q.head
 	for head != nil {
 		if head.val == element {
@@ -104,7 +89,7 @@ func (q *queue[T]) Contains(element T) bool {
 }
 
 // Removes the first instance of the given element from the queue.
-func (q *queue[T]) Remove(val T) {
+func (q *Queue[T]) Remove(val T) {
 	sentinel := &node[T]{next: q.head}
 
 	for sentinel.next != nil {
@@ -119,7 +104,7 @@ func (q *queue[T]) Remove(val T) {
 }
 
 // Filters all elements from the queue that satisfy the given predicate.
-func (q *queue[T]) Filter(filter func(val T) bool) {
+func (q *Queue[T]) Filter(filter func(val T) bool) {
 	if q.head == nil {
 		return
 	}
@@ -141,17 +126,17 @@ func (q *queue[T]) Filter(filter func(val T) bool) {
 }
 
 // Returns the amount of elements contained within the queue.
-func (q *queue[T]) Size() int {
+func (q *Queue[T]) Size() int {
 	return q.size
 }
 
 // Returns true if the queue contains no elements, otherwise returns false.
-func (q *queue[T]) IsEmpty() bool {
+func (q *Queue[T]) IsEmpty() bool {
 	return q.size == 0
 }
 
 // Returns a string representation of the queue. The larger the queue, the more expensive the operation.
-func (q *queue[T]) String() string {
+func (q *Queue[T]) String() string {
 	var stringBuilder strings.Builder
 	head := q.head
 
@@ -165,4 +150,18 @@ func (q *queue[T]) String() string {
 	}
 
 	return stringBuilder.String()
+}
+
+// Returns a chan of the same type of the collection
+func (q *Queue[T]) Iter() chan T {
+	c := make(chan T)
+	go func() {
+		head := q.head
+		for head != nil {
+			c <- head.val
+			head = head.next
+		}
+		close(c)
+	}()
+	return c
 }
