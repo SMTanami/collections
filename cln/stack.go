@@ -1,4 +1,4 @@
-package cols
+package cln
 
 import (
 	"fmt"
@@ -9,22 +9,22 @@ import (
 // of the stack.
 //
 // This stack is implemented using a slice, therefore it's size is dynamic.
-type Stack[T comparable] struct {
+type stack[T comparable] struct {
 	pile []T
 }
 
-func NewStack[T comparable]() *Stack[T] {
-	return &Stack[T]{}
+func NewStack[T comparable]() *stack[T] {
+	return &stack[T]{}
 }
 
 // Adds element(s) to the top of the stack.
-func (st *Stack[T]) Add(vals ...T) {
+func (st *stack[T]) Add(vals ...T) {
 	st.pile = append(st.pile, vals...)
 }
 
 // Removes the value at the top of the stack and returns it along with a bool value of true if the stack
 // is not empty, otherwise, it will return the zero value of the stack's type and a bool value of false.
-func (st *Stack[T]) Take() (T, bool) {
+func (st *stack[T]) Take() (T, bool) {
 	if len(st.pile) == 0 {
 		var zero T
 		return zero, false
@@ -36,12 +36,12 @@ func (st *Stack[T]) Take() (T, bool) {
 }
 
 // Removes all elements from the stack.
-func (st *Stack[T]) Clear() {
+func (st *stack[T]) Clear() {
 	st.pile = make([]T, 0, 0)
 }
 
 // Returns true if the stack contains the given element, returns false otherwise.
-func (st *Stack[T]) Contains(val T) bool {
+func (st *stack[T]) Contains(val T) bool {
 	for _, v := range st.pile {
 		if v == val {
 			return true
@@ -52,7 +52,7 @@ func (st *Stack[T]) Contains(val T) bool {
 }
 
 // Removes the first instance of the given element from the top of the stack.
-func (st *Stack[T]) Remove(val T) {
+func (st *stack[T]) Remove(val T) {
 	if len(st.pile) > 0 {
 		for i := len(st.pile) - 1; i >= 0; i-- {
 			if st.pile[i] == val {
@@ -64,7 +64,7 @@ func (st *Stack[T]) Remove(val T) {
 }
 
 // Filters all elements from the stack that satisfy the given predicate.
-func (st *Stack[T]) Filter(filter func(val T) bool) {
+func (st *stack[T]) Filter(filter func(val T) bool) {
 	for i := len(st.pile) - 1; i >= 0; i-- {
 		if filter(st.pile[i]) {
 			st.pile = append(st.pile[:i], st.pile[i+1:]...)
@@ -73,12 +73,12 @@ func (st *Stack[T]) Filter(filter func(val T) bool) {
 }
 
 // Returns the amount of elements contained within the stack.
-func (st *Stack[T]) Size() int {
+func (st *stack[T]) Size() int {
 	return len(st.pile)
 }
 
 // Returns true if the stack contains no elements, otherwise returns false.
-func (st *Stack[T]) IsEmpty() bool {
+func (st *stack[T]) IsEmpty() bool {
 	if len(st.pile) == 0 {
 		return true
 	}
@@ -87,12 +87,12 @@ func (st *Stack[T]) IsEmpty() bool {
 }
 
 // Returns a string representation of the stack.
-func (st *Stack[T]) String() string {
+func (st *stack[T]) String() string {
 	return fmt.Sprint(st.pile)
 }
 
 // Returns a chan of the same type of the collection
-func (st *Stack[T]) Iter() chan T {
+func (st *stack[T]) Iter() chan T {
 	c := make(chan T)
 	go func() {
 		for i := 0; i < len(st.pile); i++ {
