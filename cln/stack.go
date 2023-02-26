@@ -1,23 +1,8 @@
-package stack
+package cln
 
 import (
 	"fmt"
 )
-
-type Collection[T comparable] interface {
-	Add(vals ...T)
-	Take() (T, bool)
-	Contains(val T) bool
-	Clear()
-	Size() int
-	IsEmpty() bool
-}
-
-// Filter is the interface that wraps the basic Filter and Remove methods.
-type Filterable[T comparable] interface {
-	Remove(val T)
-	Filter(filter func(v T) bool)
-}
 
 // A Stack is a Collection implementation that maintains data in a LIFO (last-in-first-out) manner. All elements added
 // to the stack are added to the 'top' of the stack. Operations used to retrieve data return the value stored at the 'top'
@@ -28,7 +13,7 @@ type stack[T comparable] struct {
 	pile []T
 }
 
-func New[T comparable]() *stack[T] {
+func NewStack[T comparable]() *stack[T] {
 	return &stack[T]{}
 }
 
@@ -104,4 +89,16 @@ func (st *stack[T]) IsEmpty() bool {
 // Returns a string representation of the stack.
 func (st *stack[T]) String() string {
 	return fmt.Sprint(st.pile)
+}
+
+// Returns a chan of the same type of the collection
+func (st *stack[T]) Iter() chan T {
+	c := make(chan T)
+	go func() {
+		for i := 0; i < len(st.pile); i++ {
+			c <- st.pile[i]
+		}
+		close(c)
+	}()
+	return c
 }
